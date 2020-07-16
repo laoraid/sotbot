@@ -1,6 +1,5 @@
 import os
 import difflib
-from difflib import SequenceMatcher
 from discord.ext import commands
 import discord
 import pandas as pd
@@ -62,8 +61,4 @@ async def on_member_join(member):
     await ch.send(msg)
 
 print('봇 실행중')
-str1 = 'Sanctuary Outpost'
-str2 = 'santury'
-ratio = SequenceMatcher(None, str1, str2).ratio()
-print(ratio)
 bot.run(BOT_TOKEN)
