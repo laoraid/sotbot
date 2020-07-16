@@ -1,5 +1,6 @@
 import os
 import difflib
+import re
 from discord.ext import commands
 import discord
 import pandas as pd
@@ -23,7 +24,16 @@ async def 아이디(ctx: commands.Context, *args):
         return None
     prevnick = ctx.author.display_name
     id = args[0]
-    nick = prevnick + '(' + id + ')'
+
+    pattern = r'(?P<nickname>\S+)\s*\(.+\)'
+
+    mat = re.match(pattern, prevnick)
+
+    if not mat is None:
+        nick = f'{mat.group("nickname")}({id})'
+    else:
+        nick = f'{prevnick}({id})'
+
     await ctx.author.edit(nick=nick)
     await ctx.send(f'{prevnick}의 닉네임이 {nick}으로 변경되었습니다.')
 
