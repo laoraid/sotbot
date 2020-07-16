@@ -31,5 +31,5 @@ async def on_member_join(member):
     ch = bot.get_channel(635398034469158914)
     await ch.send(msg)
 
-
+print('봇 실행중')
 bot.run(BOT_TOKEN)
