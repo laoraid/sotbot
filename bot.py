@@ -64,9 +64,8 @@ async def 좌표(ctx, *args):
 
 @bot.event
 async def on_member_join(member):
-    msg = (f'{member.mention} 디시인사이드 Sea of Thieves 갤러리 디스코드에 오신 걸 환영합니다.\n'
-           '!아이디 ``xboxid`` 명령어로 게임 내 아이디를 지정해 주세요.\n'
-           '규칙은 https://discord.gg/QhHZJUH 에서 확인 가능합니다.')
+    msg = (f'{member.mention} ``!아이디`` ``xboxid`` 로 게임 내 아이디 지정하고\n'
+           '규칙은 https://discord.gg/QhHZJUH 보고 겜하셈')
     ch = bot.get_channel(726374943121473627)
     await ch.send(msg)
 
