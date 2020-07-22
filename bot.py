@@ -1,9 +1,15 @@
 import os
 import difflib
 import re
+import time
+
 from discord.ext import commands
 import discord
-import pandas as pd
+
+import openpyxl
+
+import requests
+# from bs4 import BeautifulSoup
 
 try:
     BOT_TOKEN = os.environ['BOT_TOKEN']
@@ -12,9 +18,19 @@ except KeyError:
     BOT_TOKEN = config.TOKEN
 
 bot = commands.Bot(command_prefix='!')
-islandspos = pd.read_excel('islands.xlsx',
-                           header=0,
-                           index_col=0).to_dict()['pos']
+sheet = openpyxl.load_workbook('./islands.xlsx')['Sheet1']
+i = 2
+islandspos = {}
+while (True):
+    islandname = sheet.cell(row=i, column=1).value
+
+    if islandname is None:
+        break
+    pos = sheet.cell(row=i, column=2).value
+    region = sheet.cell(row=i, column=3).value
+
+    islandspos[islandname] = [pos, region]
+    i += 1
 
 
 @bot.command()
@@ -29,7 +45,7 @@ async def 아이디(ctx: commands.Context, *args):
 
     mat = re.match(pattern, prevnick)
 
-    if not mat is None:
+    if mat is not None:
         nick = f'{mat.group("nickname")}({id})'
     else:
         nick = f'{prevnick}({id})'
@@ -59,7 +75,49 @@ async def 좌표(ctx, *args):
             island = substr[0]
     else:
         island = clmat[0]
-    await ctx.send(f"``{island}``의 좌표는 ``{islandspos[island]}``")
+    await ctx.send(embed=make_pos_embed(island))
+
+
+def make_pos_embed(name):
+    urlname = name.replace(" ", "_")
+    WIKI_URL = f"https://seaofthieves.gamepedia.com/{urlname}"
+    embed = discord.Embed(title=name, url=WIKI_URL)
+    pr = islandspos[name]
+    embed.add_field(name="좌표", value=pr[0], inline=True)
+    embed.add_field(name="해역", value=pr[1], inline=True)
+    embed.set_footer(text="섬 이름 클릭시 위키로 이동됨")
+    return embed
+
+
+lastchktime = None
+lastserverstat = ""
+RELOAD_TIME = 240
+
+
+@bot.is_owner
+@bot.command
+async def 서버(ctx):
+    STATURL = "https://www.seaofthieves.com/status"
+
+    if lastchktime is None:
+        cachetime = RELOAD_TIME
+    else:
+        cachetime = time.time() - lastchktime
+
+    if cachetime < RELOAD_TIME:
+        await ctx.send(lastserverstat)
+        return None
+
+    res = requests.get(STATURL)
+
+    if res.status_code != 200 or res is None:
+        await ctx.send("서버 상태를 확인할 수 없습니다.")
+        return None
+
+    # soup = BeautifulSoup(res.text)
+
+    # srvinfo = soup.find("div", {"class": "service__info"})
+    # h2 = srvinfo.find("h2").
 
 
 @bot.event
