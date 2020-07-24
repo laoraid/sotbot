@@ -64,17 +64,17 @@ async def 좌표(ctx, *args):
     island = ' '.join(args)
     islands = list(islandspos.keys())
 
-    clmat = difflib.get_close_matches(island, islands, cutoff=0.5)
+    substr = [x for x in islands if island in x.lower()]
 
-    if (len(clmat) == 0):
-        substr = [x for x in islands if island in x.lower()]
-        if (len(substr) == 0):
+    if (len(substr) == 0):
+        clmat = difflib.get_close_matches(island, islands, cutoff=0.5)
+        if (len(clmat) == 0):
             await ctx.send(f"``{island}`` 섬을 찾을 수 없습니다.")
             return None
         else:
-            island = substr[0]
+            island = clmat[0]
     else:
-        island = clmat[0]
+        island = substr[0]
     await ctx.send(embed=make_pos_embed(island))
 
 
