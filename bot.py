@@ -1,7 +1,7 @@
 import os
 import difflib
 import re
-import time
+import datetime
 
 from discord.ext import commands
 import discord
@@ -9,7 +9,7 @@ import discord
 import openpyxl
 
 import requests
-# from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 try:
     BOT_TOKEN = os.environ['BOT_TOKEN']
@@ -18,7 +18,7 @@ except KeyError:
     BOT_TOKEN = config.TOKEN
 
 bot = commands.Bot(command_prefix='!')
-sheet = openpyxl.load_workbook('./islands.xlsx')['Sheet1']
+sheet = openpyxl.load_workbook('./islands.xlsx', data_only=True)['Sheet1']
 i = 2
 islandspos = {}
 while (True):
@@ -28,8 +28,9 @@ while (True):
         break
     pos = sheet.cell(row=i, column=2).value
     region = sheet.cell(row=i, column=3).value
+    engname = sheet.cell(row=i, column=4).value
 
-    islandspos[islandname] = [pos, region]
+    islandspos[islandname] = [pos, region, engname]
     i += 1
 
 
@@ -79,10 +80,10 @@ async def 좌표(ctx, *args):
 
 
 def make_pos_embed(name):
-    urlname = name.replace(" ", "_")
+    pr = islandspos[name]
+    urlname = pr[2].replace(" ", "_")
     WIKI_URL = f"https://seaofthieves.gamepedia.com/{urlname}"
     embed = discord.Embed(title=name, url=WIKI_URL)
-    pr = islandspos[name]
     embed.add_field(name="좌표", value=pr[0], inline=True)
     embed.add_field(name="해역", value=pr[1], inline=True)
     embed.set_footer(text="섬 이름 클릭시 위키로 이동됨")
@@ -91,18 +92,22 @@ def make_pos_embed(name):
 
 lastchktime = None
 lastserverstat = ""
-RELOAD_TIME = 240
+RELOAD_TIME = datetime.timedelta(minutes=3)
 
 
-@bot.is_owner
-@bot.command
+@bot.command()
 async def 서버(ctx):
-    STATURL = "https://www.seaofthieves.com/status"
+    STATURL = "https://www.seaofthieves.com/ko/status"
+    SERVER_IS_SICK = ":regional_indicator_x: 점검중이거나 서버가 터졌어요."
+    SERVER_HEALTHY = ":white_check_mark: 서버가 정상이에요."
+    SERVER_UNKNOWN = "서버 상태를 확인할 수 없어요."
+
+    global lastserverstat, lastchktime
 
     if lastchktime is None:
         cachetime = RELOAD_TIME
     else:
-        cachetime = time.time() - lastchktime
+        cachetime = datetime.datetime.now() - lastchktime
 
     if cachetime < RELOAD_TIME:
         await ctx.send(lastserverstat)
@@ -111,13 +116,24 @@ async def 서버(ctx):
     res = requests.get(STATURL)
 
     if res.status_code != 200 or res is None:
-        await ctx.send("서버 상태를 확인할 수 없습니다.")
+        await ctx.send(SERVER_UNKNOWN)
         return None
 
-    # soup = BeautifulSoup(res.text)
+    soup = BeautifulSoup(res.text, 'html.parser')
 
-    # srvinfo = soup.find("div", {"class": "service__info"})
-    # h2 = srvinfo.find("h2").
+    srvinfo = soup.find("div", {"class": "service__info"})
+    text = srvinfo.find("h2").contents[0]
+    lastchktime = datetime.datetime.now()
+
+    if text == "문제가 발생하여 서비스에 지장이 있습니다.":
+        await ctx.send(SERVER_IS_SICK)
+        lastserverstat = SERVER_IS_SICK
+    if text == "모든 서비스가 정상 운영되고 있습니다.":
+        await ctx.send(SERVER_HEALTHY)
+        lastserverstat = SERVER_HEALTHY
+    else:
+        await ctx.send(SERVER_UNKNOWN)
+        lastserverstat = SERVER_UNKNOWN
 
 
 @bot.event
