@@ -13,12 +13,6 @@ import requests
 from bs4 import BeautifulSoup
 # endregion
 
-try:
-    BOT_TOKEN = os.environ['BOT_TOKEN']
-except KeyError:
-    import config
-    BOT_TOKEN = config.TOKEN
-
 
 bot = commands.Bot(command_prefix='!')
 
@@ -26,6 +20,7 @@ bot = commands.Bot(command_prefix='!')
 sheet = openpyxl.load_workbook('./islands.xlsx', data_only=True)['Sheet1']
 i = 2
 islandspos = {}
+engislandpos = {}
 while (True):
     islandname = sheet.cell(row=i, column=1).value
 
@@ -36,6 +31,7 @@ while (True):
     engname = sheet.cell(row=i, column=4).value
 
     islandspos[islandname] = [pos, region, engname]
+    engislandpos[engname] = [pos, region, engname]
     i += 1
 # endregion
 
@@ -73,7 +69,14 @@ async def 좌표(ctx, *args):
 
     args = [x.lower() for x in args]
     island = ' '.join(args)
-    islands = list(islandspos.keys())
+
+    iseng = re.match(r'[^ㄱ-ㅎㅏ-ㅣ가-힣]', island)
+    iseng = True if iseng is not None else False
+
+    if iseng:
+        islands = list(engislandpos.keys())
+    else:
+        islands = list(islandspos.keys())
 
     substr = [x for x in islands if island in x.lower()]
 
@@ -86,11 +89,14 @@ async def 좌표(ctx, *args):
             island = clmat[0]
     else:
         island = substr[0]
-    await ctx.send(embed=make_pos_embed(island))
+    await ctx.send(embed=make_pos_embed(island, iseng))
 
 
-def make_pos_embed(name):
-    pr = islandspos[name]
+def make_pos_embed(name, iseng):
+    if iseng:
+        pr = engislandpos[name]
+    else:
+        pr = islandspos[name]
     urlname = pr[2].replace(" ", "_")
     WIKI_URL = f"https://seaofthieves.gamepedia.com/{urlname}"
     embed = discord.Embed(title=name, url=WIKI_URL)
@@ -157,8 +163,8 @@ async def on_member_join(member):
 bot.remove_command('help')
 
 
-@bot.command(description='이 도움말을 출력합니다.')
-async def help(ctx, *args):
+@bot.command(aliases=['help'],description='이 도움말을 출력합니다.')
+async def 도움말(ctx, *args):
     if len(args) == 0:
         await ctx.send(embed=make_help_embed())
     else:
@@ -200,5 +206,11 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(name='!help'))
     print(f'봇 실행중 서버 : {len(bot.guilds)}개')
 
+
+try:
+    BOT_TOKEN = os.environ['BOT_TOKEN']
+except KeyError:
+    import config
+    BOT_TOKEN = config.TOKEN
 
 bot.run(BOT_TOKEN)
