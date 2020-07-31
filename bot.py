@@ -1,3 +1,4 @@
+# region imports
 import os
 import difflib
 import re
@@ -10,6 +11,7 @@ import openpyxl
 
 import requests
 from bs4 import BeautifulSoup
+# endregion
 
 try:
     BOT_TOKEN = os.environ['BOT_TOKEN']
@@ -17,7 +19,10 @@ except KeyError:
     import config
     BOT_TOKEN = config.TOKEN
 
+
 bot = commands.Bot(command_prefix='!')
+
+# region excel parse
 sheet = openpyxl.load_workbook('./islands.xlsx', data_only=True)['Sheet1']
 i = 2
 islandspos = {}
@@ -32,9 +37,13 @@ while (True):
 
     islandspos[islandname] = [pos, region, engname]
     i += 1
+# endregion
+
+# region commands
 
 
-@bot.command()
+@bot.command(description="xbox 아이디가 포함되게 닉네임을 변경합니다.",
+             help="``!아이디`` ``xboxid``")
 async def 아이디(ctx: commands.Context, *args):
     if (len(args) == 0):
         await ctx.send('사용법 : ``!아이디`` ``xboxid``')
@@ -55,7 +64,8 @@ async def 아이디(ctx: commands.Context, *args):
     await ctx.send(f'{prevnick}의 닉네임이 {nick}으로 변경되었습니다.')
 
 
-@bot.command()
+@bot.command(aliases=['pos'], description="섬의 좌표와 위키 링크를 출력합니다.",
+             help='``!좌표`` ``섬 이름``')
 async def 좌표(ctx, *args):
     if (len(args) == 0):
         await ctx.send('사용법 : ``!좌표`` ``섬 이름``')
@@ -95,7 +105,7 @@ lastserverstat = ""
 RELOAD_TIME = datetime.timedelta(minutes=3)
 
 
-@bot.command()
+@bot.command(description="서버 상태를 확인합니다. 쿨타임 3분", help="``!서버``")
 async def 서버(ctx):
     STATURL = "https://www.seaofthieves.com/ko/status"
     SERVER_IS_SICK = ":regional_indicator_x: 점검중이거나 서버가 터졌어요."
@@ -135,13 +145,59 @@ async def 서버(ctx):
         await ctx.send(SERVER_UNKNOWN)
         lastserverstat = SERVER_UNKNOWN
 
-
+"""
 @bot.event
 async def on_member_join(member):
     msg = (f'{member.mention} ``!아이디`` ``xboxid`` 로 게임 내 아이디 지정하고\n'
            '규칙은 https://discord.gg/QhHZJUH 보고 겜하셈')
     ch = bot.get_channel(726374943121473627)
     await ch.send(msg)
+"""
 
-print('봇 실행중')
+bot.remove_command('help')
+
+
+@bot.command(description='이 도움말을 출력합니다.')
+async def help(ctx, *args):
+    if len(args) == 0:
+        await ctx.send(embed=make_help_embed())
+    else:
+        ac = bot.all_commands
+        cn = ''.join(args)
+        if cn == 'help':
+            await ctx.send(embed=make_help_embed())
+        elif cn in ac:
+            await ctx.send(ac[cn].help)
+        else:
+            await ctx.send(f'``{cn}`` 명령어를 찾을 수 없습니다.')
+
+
+def make_help_embed():
+    coms = bot.commands
+    embed = discord.Embed(title='명령어 리스트')
+
+    for c in coms:
+        arr = [c.name]
+        arr.extend(c.aliases)
+        embed.add_field(name=', '.join(arr), value=c.description)
+
+    embed.set_footer(text="'!help 명령어' 입력시 개별 명령어 도움말 출력")
+    return embed
+# endregion
+
+
+@bot.event
+async def on_message(msg):
+    allowchannel = [635398034469158914, 727899444074250280]
+    if msg.channel.id not in allowchannel:
+        return
+    await bot.process_commands(msg)
+
+
+@bot.event
+async def on_ready():
+    await bot.change_presence(activity=discord.Game(name='!help'))
+    print(f'봇 실행중 서버 : {len(bot.guilds)}개')
+
+
 bot.run(BOT_TOKEN)
