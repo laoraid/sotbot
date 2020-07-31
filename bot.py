@@ -188,7 +188,8 @@ def make_help_embed():
 
 @bot.event
 async def on_message(msg):
-    allowchannel = [635398034469158914, 727899444074250280]
+    allowchannel = [635398034469158914, 738655532709183551]
+    # test channel, gall discord channel
     if msg.channel.id not in allowchannel:
         return
     await bot.process_commands(msg)
