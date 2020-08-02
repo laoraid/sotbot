@@ -45,7 +45,7 @@ async def 아이디(ctx: commands.Context, *args):
         await ctx.send('사용법 : ``!아이디`` ``xboxid``')
         return None
     prevnick = ctx.author.display_name
-    id = args[0]
+    id = " ".join(args)
 
     pattern = r'(?P<nickname>\S+)\s*\(.+\)'
 
@@ -168,18 +168,17 @@ async def 도움말(ctx, *args):
     if len(args) == 0:
         await ctx.send(embed=make_help_embed())
     else:
-        ac = bot.all_commands
         cn = ''.join(args)
         if cn == 'help':
             await ctx.send(embed=make_help_embed())
-        elif cn in ac:
-            await ctx.send(ac[cn].help)
+        elif cn in viscomsdict:
+            await ctx.send(viscomsdict[cn].help)
         else:
             await ctx.send(f'``{cn}`` 명령어를 찾을 수 없습니다.')
 
 
 def make_help_embed():
-    coms = bot.commands
+    coms = viscoms
     embed = discord.Embed(title='명령어 리스트')
 
     for c in coms:
@@ -212,5 +211,8 @@ try:
 except KeyError:
     import config
     BOT_TOKEN = config.TOKEN
+
+viscomsdict = {k: v for k, v in bot.all_commands.items() if not v.hidden}
+viscoms = [x for x in bot.commands if not x.hidden]
 
 bot.run(BOT_TOKEN)
