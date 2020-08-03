@@ -229,6 +229,8 @@ async def on_command_error(ctx, error):
             await ctx.send(embed=make_help_embed())
         else:
             await ctx.send(f"사용법 : {ctx.command.help}")
+    elif isinstance(error, commands.CommandNotFound):
+        await ctx.send(f"``{ctx.message.content[1:]}`` 명령어는 없는 명령어입니다.")
     else:
         log_e(ctx, error)
         owner = f"<@!{bot.owner_id}>"
