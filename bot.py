@@ -14,7 +14,6 @@ from bs4 import BeautifulSoup
 # endregion
 
 CMD_PREFIX = "!"
-HELP_PREFIX = f"``{CMD_PREFIX}"
 
 bot = commands.Bot(command_prefix=CMD_PREFIX)
 bot.owner_id = 226700060308668420
