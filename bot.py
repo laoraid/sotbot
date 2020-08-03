@@ -195,8 +195,8 @@ def make_help_embed():
 
 @bot.before_invoke
 async def log_i(ctx: commands.Context):
-    print(f"[info/{ctx.message.created_at}] {ctx.author} | {ctx.message.content}")
-
+    ca = dt_to_str(ctx.message.created_at)
+    print(f"[info/{ca}] {ctx.author} | {ctx.message.content}")
 
 def log_e(ctx, error):
     now = dt_to_str(datetime.datetime.now())
