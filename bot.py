@@ -16,7 +16,6 @@ from bs4 import BeautifulSoup
 CMD_PREFIX = "!"
 HELP_PREFIX = f"``{CMD_PREFIX}"
 
-
 bot = commands.Bot(command_prefix=CMD_PREFIX)
 bot.owner_id = 226700060308668420
 
@@ -34,16 +33,26 @@ while (True):
     region = sheet.cell(row=i, column=3).value
     engname = sheet.cell(row=i, column=4).value
 
-    islandspos[islandname] = [pos, region, engname]
-    engislandpos[engname] = [pos, region, engname]
+    v = [pos, region, engname]
+
+    islandspos[islandname] = v
+    engislandpos[engname] = v
     i += 1
 # endregion
 
 # region commands
 
+def mkhelpstr(cmd, *args):
+    if len(args) != 0:
+        args = "`` ``".join(args)
+        args = f" ``{args}``"
+    else:
+        args=""
+    return f"``{CMD_PREFIX}{cmd}``{args}"
+
 
 @bot.command(description="xbox 아이디가 포함되게 닉네임을 변경합니다.",
-             help=f"{HELP_PREFIX}아이디`` ``xboxid``")
+             help=mkhelpstr("아이디","xboxid"))
 async def 아이디(ctx, *, id):
     prevnick = ctx.author.display_name
 
@@ -61,7 +70,7 @@ async def 아이디(ctx, *, id):
 
 
 @bot.command(aliases=['pos'], description="섬의 좌표와 위키 링크를 출력합니다.",
-             help=f"{HELP_PREFIX}좌표`` ``섬 이름``")
+             help=mkhelpstr("좌표","섬 이름"))
 async def 좌표(ctx, *, island):
     island = island.lower()
 
@@ -111,7 +120,7 @@ def dt_to_str(date: datetime.datetime):
 
 
 @bot.command(description="서버 상태를 확인합니다. 쿨타임 3분",
-             help=f"{HELP_PREFIX}서버``")
+             help=mkhelpstr("서버"))
 async def 서버(ctx):
     STATURL = "https://www.seaofthieves.com/ko/status"
     SERVER_IS_SICK = ":regional_indicator_x: 점검중이거나 서버가 터졌어요."
