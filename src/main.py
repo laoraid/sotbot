@@ -1,5 +1,6 @@
 # region imports
 import os
+import traceback
 
 from discord.ext import commands
 import discord
@@ -45,6 +46,7 @@ async def on_command_error(ctx, error):
         utils.log_e(ctx, error)
         owner = f"<@!{bot.owner_id}>"
         await ctx.send(f"에러가 발생했습니다. {owner}")
+        traceback.print_exception(type(error), error, error.__traceback__)
 
 try:
     BOT_TOKEN = os.environ['BOT_TOKEN']
