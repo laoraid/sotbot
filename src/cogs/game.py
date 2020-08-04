@@ -44,6 +44,7 @@ class Game(commands.Cog):
     @commands.command(aliases=['pos'], description="섬의 좌표와 위키 링크를 출력합니다.",
                       help=mkhelpstr("좌표", "섬 이름"))
     async def 좌표(self, ctx, *, island):
+        origin = island
         island = island.lower()
 
         iseng = re.match(r'[^ㄱ-ㅎㅏ-ㅣ가-힣]', island)
@@ -60,11 +61,15 @@ class Game(commands.Cog):
             clmat = difflib.get_close_matches(island, islands, cutoff=0.5)
             if (len(clmat) == 0):
                 await ctx.send(f"``{island}`` 섬을 찾을 수 없습니다.")
+                utils.log_v(ctx, f"{island} 검색 실패")
                 return None
             else:
                 island = clmat[0]
+                ratio = difflib.SequenceMatcher(None, origin, island).ratio()
+                utils.log_v(ctx, f"{origin} -> {island} (유사도 : {ratio:.2f})")
         else:
             island = substr[0]
+            utils.log_v(ctx, f"{origin} -> {island} (부분 문자열)")
         await ctx.send(embed=self.make_pos_embed(island, iseng))
 
     def make_pos_embed(self, name, iseng):
@@ -93,7 +98,9 @@ class Game(commands.Cog):
         if self.lastchktime is None:
             cachetime = RELOAD_TIME
         else:
-            cachetime = datetime.datetime.utcnow() - self.lastchktime
+            utc = datetime.datetime.utcnow()
+            utc = utils.UTC.localize(utc)
+            cachetime = utc - self.lastchktime
 
         if not cachetime < RELOAD_TIME:
             msg = await ctx.send("서버 상태 확인중...")
@@ -105,10 +112,12 @@ class Game(commands.Cog):
                     if res.status == 200:
                         soup = BeautifulSoup(await res.text(), 'html.parser')
                     elif res.status != 200 or res is None:
+                        utils.log_v(ctx, "서버 상태 확인 불가")
                         self.lastserverstat = SERVER_UNKNOWN
                         await ctx.send(self.lastserverstat)
                         return None
 
+            utils.log_v(ctx, "서버 상태 불러옴")
             srvinfo = soup.find("div", {"class": "service__info"})
             text = srvinfo.find("h2").contents[0]
 
@@ -118,7 +127,8 @@ class Game(commands.Cog):
                 self.lastserverstat = SERVER_HEALTHY
             else:
                 self.lastserverstat = SERVER_UNKNOWN
-
+        else:
+            utils.log_v(ctx, f"이전 상태 불러옴 {cachetime}")
         lctstr = dt_to_str(self.lastchktime)
 
         if msg is not None:

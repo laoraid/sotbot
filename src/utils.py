@@ -69,3 +69,8 @@ def log_e(ctx, error):
     time = toKCT(datetime.datetime.now())
     now = dt_to_str(time, True)
     print(f"[error/{now}] | {ctx.message.content} | {error}")
+
+def log_v(ctx, v):
+    time = toKCT(ctx.message.created_at)
+    ca = dt_to_str(time, True)
+    print(f"[Vervose/{ca}] {ctx.message.content} | {v}")

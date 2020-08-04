@@ -38,9 +38,11 @@ async def on_command_error(ctx, error):
         else:
             await ctx.send(f"사용법 : {ctx.command.help}")
     elif isinstance(error, commands.CommandNotFound):
+        utils.log_e(ctx, "없는 명령어")
         cmd = ctx.message.content.split(' ')[0][1:]
         await ctx.send(f"``{cmd}`` 명령어는 없는 명령어입니다.")
     elif isinstance(error, commands.MissingRole):
+        utils.log_e(ctx, "권한 부족")
         await ctx.send("권한이 부족합니다.")
     else:
         utils.log_e(ctx, error)
