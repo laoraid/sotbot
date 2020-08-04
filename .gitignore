@@ -132,3 +132,4 @@ dmypy.json
 config.py
 .vscode/
 simpletests.py
+check.bat

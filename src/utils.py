@@ -1,10 +1,20 @@
 import datetime
+import pytz
 
 import discord
+
+KCT = pytz.timezone("Asia/Seoul")
+UTC = pytz.utc
 
 CMD_PREFIX = "!"
 
 extensions = ["src.cogs.game", "src.cogs.manage"]
+
+
+def toKCT(date):
+    if date.tzinfo is None:
+        date = UTC.localize(date)
+    return date.astimezone(KCT)
 
 
 def mkhelpstr(cmd, *args):
@@ -16,8 +26,11 @@ def mkhelpstr(cmd, *args):
     return f"``{CMD_PREFIX}{cmd}``{args}"
 
 
-def dt_to_str(date):
-    return date.strftime("%Y-%m-%d %H:%M:%S")
+def dt_to_str(date, inclue_timezone=False):
+    tz = ""
+    if inclue_timezone:
+        tz = " %Z%z"
+    return date.strftime(f"%Y-%m-%d %H:%M:%S{tz}")
 
 
 helpembed = discord.Embed(title="명령어 리스트")
@@ -47,10 +60,12 @@ def initbot(bot):
 
 
 def log_i(ctx):
-    ca = dt_to_str(ctx.message.created_at)
+    time = toKCT(ctx.message.created_at)
+    ca = dt_to_str(time, True)
     print(f"[info/{ca}] {ctx.author} | {ctx.message.content}")
 
 
 def log_e(ctx, error):
-    now = dt_to_str(datetime.datetime.now())
+    time = toKCT(datetime.datetime.now())
+    now = dt_to_str(time, True)
     print(f"[error/{now}] | {ctx.message.content} | {error}")

@@ -9,6 +9,7 @@ import openpyxl
 from bs4 import BeautifulSoup
 
 from ..utils import dt_to_str, mkhelpstr
+from .. import utils
 
 RELOAD_TIME = datetime.timedelta(minutes=3)
 
@@ -92,13 +93,14 @@ class Game(commands.Cog):
         if self.lastchktime is None:
             cachetime = RELOAD_TIME
         else:
-            cachetime = datetime.datetime.now() - self.lastchktime
+            cachetime = datetime.datetime.utcnow() - self.lastchktime
 
         if not cachetime < RELOAD_TIME:
             msg = await ctx.send("서버 상태 확인중...")
             async with aiohttp.ClientSession() as session:
                 async with session.get(STATURL) as res:
-                    self.lastchktime = datetime.datetime.now()
+                    self.lastchktime = datetime.datetime.utcnow()
+                    self.lastchktime = utils.toKCT(self.lastchktime)
 
                     if res.status == 200:
                         soup = BeautifulSoup(await res.text(), 'html.parser')
