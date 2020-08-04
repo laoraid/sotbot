@@ -39,6 +39,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandNotFound):
         cmd = ctx.message.content.split(' ')[0][1:]
         await ctx.send(f"``{cmd}`` 명령어는 없는 명령어입니다.")
+    elif isinstance(error, commands.MissingRole):
+        await ctx.send("권한이 부족합니다.")
     else:
         utils.log_e(ctx, error)
         owner = f"<@!{bot.owner_id}>"

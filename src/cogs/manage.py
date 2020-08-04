@@ -1,5 +1,6 @@
 import re
 
+import discord
 from discord.ext import commands
 
 from .. import utils
@@ -35,6 +36,18 @@ class Manage(commands.Cog):
 
         await ctx.author.edit(nick=nick)
         await ctx.send(f'{prevnick}의 닉네임이 {nick}으로 변경되었습니다.')
+
+    @commands.command(hidden=True, help=mkhelpstr("역할부여", "역할이름"))
+    @commands.has_role("관리직")
+    async def 역할부여(self, ctx: commands.Context, r):
+        guild = ctx.message.guild
+        members = ctx.message.guild.members
+        role = discord.utils.get(guild.roles, name=r)
+        admin = discord.utils.get(guild.roles, name="관리직")
+
+        for member in members:
+            if admin not in member.roles and not member.bot:
+                await member.add_roles(role)
 
 
 def setup(bot):
