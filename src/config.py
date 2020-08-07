@@ -2,15 +2,19 @@ EXTENSIONS = ["src.cogs.game", "src.cogs.manage"]
 OWNER_ID = 226700060308668420
 CMD_PREFIX = "!"
 
-LONG_DESCRIPTION = {"도움말": "명령어 리스트를 출력합니다.",
-                    "좌표": ("검색한 섬 이름과 가장 유사한 섬의 좌표와 위키 링크를 출력합니다."
-                           " 한글, 영어를 둘 다 지원합니다."),
-                    "서버": ("서버 상태를 확인합니다.\n"
-                           "쿨타임은 3분이며 https://www.seaofthieves.com/ko/status"
-                           "에서 불러오기 때문에 실제 서버 상태와 다를 수 있습니다."),
-                    "아이디": "xbox 아이디가 포함되게 닉네임을 변경합니다. xbox 아이디만 입력하세요.",
-                    "동물": ("현재 좌표에서 가장 가까운 동물이 있는 섬을 찾습니다.\n\n"
-                           "``현재 좌표`` : 지금 있는 좌표(E-12, A4 등)\n"
-                           "``동물1, 동물2...`` : 동물 이름 (닭, 돼지, 뱀)\n\n"
-                           f"EX) ``{CMD_PREFIX}동물`` ``A12`` ``뱀`` ``닭``\n"
-                           f"``{CMD_PREFIX}동물`` ``D5`` ``닭``")}
+LONG_DESCRIPTIONS = {}
+
+with open("./src/long_descriptions.txt", encoding="UTF-8") as f:
+    d = f.readlines()
+
+for line in d:
+    if line.startswith("!"):
+        des = ""
+        cmd = line[1:].strip()
+    elif line.startswith("$"):
+        LONG_DESCRIPTIONS[cmd] = des.strip()
+    else:
+        des += line.replace("{CMD_PREFIX}", CMD_PREFIX)
+
+ALLOW_CHANNEL = [635398034469158914, 738655532709183551]
+# test channel, gall discord channel

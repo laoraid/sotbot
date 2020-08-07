@@ -164,8 +164,9 @@ class Game(commands.Cog):
             return True
 
         stx, sty = get_int(pos)
+        items = self.islandspos.items()
         islands = [(k, get_int(v[0].replace("-", "")))
-                   for k, v in self.islandspos.items() if chk_animal(v, animals)]
+                   for k, v in items if chk_animal(v, animals)]
 
         distemp = 100000
         numtemp = -1
@@ -186,7 +187,8 @@ class Game(commands.Cog):
 
     @commands.command(description="현재 좌표에서 가장 가까운 동물이 있는 섬을 찾습니다.",
                       usage=mkhelpstr("동물", "현재 좌표", "동물1", "동물2..."))
-    async def 동물(self, ctx, p: converters.Position, n: commands.Greedy[converters.Animal]):
+    async def 동물(self, ctx, p: converters.Position,
+                 n: commands.Greedy[converters.Animal]):
         if len(n) == 0:
             raise commands.BadArgument(
                 f"동물 이름을 알 수 없습니다.\nEX) {CMD_PREFIX}동물 E21 닭 돼지")

@@ -6,7 +6,7 @@ import random
 import discord
 from discord.ext import commands
 
-from ..config import CMD_PREFIX, LONG_DESCRIPTION
+from ..config import CMD_PREFIX, LONG_DESCRIPTIONS
 
 KCT = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
@@ -32,6 +32,7 @@ def dt_to_str(date, inclue_timezone=False):
     if inclue_timezone:
         tz = " %Z%z"
     return date.strftime(f"%Y-%m-%d %H:%M:%S{tz}")
+
 
 def randcolor():
     return random.randint(0, 255) ** 3
@@ -82,7 +83,7 @@ def make_cmd_help_embed(cmd: commands.Command):
 
     embed = discord.Embed(title=f"{cmd.name} 명령어", color=0xeec42b)
 
-    embed.add_field(name="설명", value=LONG_DESCRIPTION[cmd.name], inline=False)
+    embed.add_field(name="설명", value=LONG_DESCRIPTIONS[cmd.name], inline=False)
     embed.add_field(name="사용법", value=cmd.usage)
 
     return embed

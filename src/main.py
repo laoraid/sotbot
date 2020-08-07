@@ -6,7 +6,8 @@ from discord.ext import commands
 import discord
 
 from . import utils
-from .config import CMD_PREFIX, EXTENSIONS, OWNER_ID
+from .config import CMD_PREFIX, EXTENSIONS, OWNER_ID, ALLOW_CHANNEL
+
 # endregion
 
 
@@ -16,9 +17,7 @@ bot.owner_id = OWNER_ID
 
 @bot.event
 async def on_message(msg):
-    allowchannel = [635398034469158914, 738655532709183551]
-    # test channel, gall discord channel
-    if msg.channel.id not in allowchannel:
+    if msg.channel.id not in ALLOW_CHANNEL:
         return
     await bot.process_commands(msg)
 
