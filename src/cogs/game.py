@@ -2,6 +2,7 @@ import re
 import difflib
 import datetime
 import aiohttp
+import math
 
 import discord
 from discord.ext import commands
@@ -10,6 +11,8 @@ from bs4 import BeautifulSoup
 
 from ..utils import dt_to_str, mkhelpstr
 from .. import utils
+from ..utils import converters
+from ..config import CMD_PREFIX
 
 RELOAD_TIME = datetime.timedelta(minutes=3)
 
@@ -22,7 +25,7 @@ class Game(commands.Cog):
         self.lastserverstat = ""
 
         sheet = openpyxl.load_workbook(
-            './islands.xlsx', data_only=True)['Sheet1']
+            './islands.xlsx', data_only=True)['KOR']
         i = 2
         self.islandspos = {}
         self.engislandpos = {}
@@ -34,15 +37,18 @@ class Game(commands.Cog):
             pos = sheet.cell(row=i, column=2).value
             region = sheet.cell(row=i, column=3).value
             engname = sheet.cell(row=i, column=4).value
+            chicken = bool(int(sheet.cell(row=i, column=5).value))
+            pig = bool(int(sheet.cell(row=i, column=6).value))
+            snake = bool(int(sheet.cell(row=i, column=7).value))
 
-            v = [pos, region, engname]
+            v = [pos, region, engname, chicken, pig, snake]
 
             self.islandspos[islandname] = v
             self.engislandpos[engname] = v
             i += 1
 
     @commands.command(aliases=['pos'], description="섬의 좌표와 위키 링크를 출력합니다.",
-                      help=mkhelpstr("좌표", "섬 이름"))
+                      usage=mkhelpstr("좌표", "섬 이름"))
     async def 좌표(self, ctx, *, island):
         origin = island
         island = island.lower()
@@ -58,7 +64,7 @@ class Game(commands.Cog):
         substr = [x for x in islands if island in x.lower()]
 
         if (len(substr) == 0):
-            clmat = difflib.get_close_matches(island, islands, cutoff=0.5)
+            clmat = difflib.get_close_matches(island, islands, cutoff=0.3)
             if (len(clmat) == 0):
                 await ctx.send(f"``{island}`` 섬을 찾을 수 없습니다.")
                 utils.log_v(ctx, f"{island} 검색 실패")
@@ -79,14 +85,17 @@ class Game(commands.Cog):
             pr = self.islandspos[name]
         urlname = pr[2].replace(" ", "_")
         WIKI_URL = f"https://seaofthieves.gamepedia.com/{urlname}"
-        embed = discord.Embed(title=name, url=WIKI_URL)
+        embed = discord.Embed(title=name, url=WIKI_URL,
+                              color=utils.randcolor())
         embed.add_field(name="좌표", value=pr[0], inline=True)
-        embed.add_field(name="해역", value=pr[1], inline=True)
+        embed.add_field(
+            name="동물", value=converters.convert_animal(pr), inline=True)
+        embed.add_field(name="해역", value=pr[1], inline=False)
         embed.set_footer(text="섬 이름 클릭시 위키로 이동됨")
         return embed
 
     @commands.command(description="서버 상태를 확인합니다. 쿨타임 3분",
-                      help=mkhelpstr("서버"))
+                      usage=mkhelpstr("서버"))
     async def 서버(self, ctx):
         STATURL = "https://www.seaofthieves.com/ko/status"
         SERVER_IS_SICK = ":regional_indicator_x: 점검중이거나 서버가 터졌어요."
@@ -135,6 +144,66 @@ class Game(commands.Cog):
             await msg.delete()
 
         await ctx.send(f"{self.lastserverstat} 확인 시간 : ``{lctstr}``")
+
+    def _calc_distance(self, pos, animals):
+        def get_int(pos):
+            x = ord(pos[0])
+            y = int(pos[1:])
+            return (x, y)
+
+        def get_distance(x1, y1, x2, y2):
+            dx = (x1 - x2) ** 2
+            dy = (y1 - y2) ** 2
+
+            return math.sqrt(dx + dy)
+
+        def chk_animal(arr, animals):
+            for animal in animals:
+                if not arr[animal]:
+                    return False
+            return True
+
+        stx, sty = get_int(pos)
+        islands = [(k, get_int(v[0].replace("-", "")))
+                   for k, v in self.islandspos.items() if chk_animal(v, animals)]
+
+        distemp = 100000
+        numtemp = -1
+
+        if len(islands) == 0:
+            return None
+
+        for i, arr in enumerate(islands):
+            dis = get_distance(stx, sty, arr[1][0], arr[1][1])
+
+            if dis < distemp:
+                distemp = dis
+                numtemp = i
+
+        utils.log_v(None, f"{pos}에서 {islands[numtemp][0]}, 거리 : {distemp}")
+
+        return islands[numtemp][0]
+
+    @commands.command(description="현재 좌표에서 가장 가까운 동물이 있는 섬을 찾습니다.",
+                      usage=mkhelpstr("동물", "현재 좌표", "동물1", "동물2..."))
+    async def 동물(self, ctx, p: converters.Position, n: commands.Greedy[converters.Animal]):
+        if len(n) == 0:
+            raise commands.BadArgument(
+                f"동물 이름을 알 수 없습니다.\nEX) {CMD_PREFIX}동물 E21 닭 돼지")
+        island = self._calc_distance(p, n)
+
+        if island is None:
+            await ctx.send("조건에 맞는 섬을 찾을 수 없습니다.")
+            utils.log_v(ctx, "조건에 맞는 섬 검색 실패")
+            return None
+
+        await ctx.send(embed=self.make_pos_embed(island, False))
+
+    @동물.error
+    async def animal_error(self, ctx, error):
+        if isinstance(error, commands.BadArgument):
+            utils.log_e(ctx, error.args[0])
+            await ctx.send(error.args[0])
 
 
 def setup(bot):

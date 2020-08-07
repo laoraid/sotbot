@@ -6,12 +6,12 @@ from discord.ext import commands
 import discord
 
 from . import utils
+from .config import CMD_PREFIX, EXTENSIONS, OWNER_ID
 # endregion
 
-CMD_PREFIX = "!"
 
 bot = commands.Bot(command_prefix=CMD_PREFIX)
-bot.owner_id = 226700060308668420
+bot.owner_id = OWNER_ID
 
 
 @bot.event
@@ -36,7 +36,7 @@ async def on_command_error(ctx, error):
         if ctx.command.name == "도움말":
             await ctx.send(embed=utils.helpembed)
         else:
-            await ctx.send(f"사용법 : {ctx.command.help}")
+            await ctx.send(embed=utils.make_cmd_help_embed(ctx.command))
     elif isinstance(error, commands.CommandNotFound):
         utils.log_e(ctx, "없는 명령어")
         cmd = ctx.message.content.split(' ')[0][1:]
@@ -44,21 +44,28 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingRole):
         utils.log_e(ctx, "권한 부족")
         await ctx.send("권한이 부족합니다.")
+    elif isinstance(error, commands.BadArgument):
+        pass  # 명령어 개별 처리
     else:
         utils.log_e(ctx, error)
         owner = f"<@!{bot.owner_id}>"
-        await ctx.send(f"에러가 발생했습니다. {owner}")
-        traceback.print_exception(type(error), error, error.__traceback__)
+        await ctx.send(f"에러가 발생했습니다. {owner}에게 문의하세요.")
+        trace = traceback.format_exception(
+            type(error), error, error.__traceback__)
+        trace = "".join(trace)
+        print(trace)
+        await bot.get_user(OWNER_ID).send(f"{ctx.message.content}\n{trace}")
+
 
 try:
     BOT_TOKEN = os.environ['BOT_TOKEN']
 except KeyError:
-    from . import config
-    BOT_TOKEN = config.TOKEN
+    from . import bottoken
+    BOT_TOKEN = bottoken.TOKEN
 
 bot.remove_command('help')
 
-for ext in utils.extensions:
+for ext in EXTENSIONS:
     bot.load_extension(ext)
 
 utils.initbot(bot)

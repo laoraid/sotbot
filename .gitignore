@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 #
-config.py
+bottoken.py
 .vscode/
 simpletests.py
 check.bat

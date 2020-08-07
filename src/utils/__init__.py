@@ -1,14 +1,15 @@
 import datetime
 import pytz
+from functools import wraps
+import random
 
 import discord
+from discord.ext import commands
+
+from ..config import CMD_PREFIX, LONG_DESCRIPTION
 
 KCT = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
-
-CMD_PREFIX = "!"
-
-extensions = ["src.cogs.game", "src.cogs.manage"]
 
 
 def toKCT(date):
@@ -32,8 +33,11 @@ def dt_to_str(date, inclue_timezone=False):
         tz = " %Z%z"
     return date.strftime(f"%Y-%m-%d %H:%M:%S{tz}")
 
+def randcolor():
+    return random.randint(0, 255) ** 3
 
-helpembed = discord.Embed(title="명령어 리스트")
+
+helpembed = discord.Embed(title="명령어 리스트", color=0x2ba3ee)
 viscomsdict = {}
 viscoms = []
 
@@ -46,9 +50,42 @@ def make_help_embed(bot):
     for c in viscoms:
         arr = [c.name]
         arr.extend(c.aliases)
-        helpembed.add_field(name=', '.join(arr), value=c.description)
+        helpembed.add_field(name=', '.join(
+            arr), value=c.description, inline=False)
 
     helpembed.set_footer(text=f"'{CMD_PREFIX}help 명령어' 입력시 개별 명령어 도움말 출력")
+
+
+def memoize(pro=None):
+    def inner(func):
+        cache = {}
+
+        @wraps(func)
+        def ininner(arg):
+            if pro is None:
+                p = arg
+            else:
+                p = getattr(arg, pro)
+            if p not in cache:
+                cache[p] = func(arg)
+            return cache[p]
+
+        return ininner
+
+    return inner
+
+
+@memoize("name")
+def make_cmd_help_embed(cmd: commands.Command):
+    if type(cmd) == str:
+        cmd = viscomsdict[cmd]
+
+    embed = discord.Embed(title=f"{cmd.name} 명령어", color=0xeec42b)
+
+    embed.add_field(name="설명", value=LONG_DESCRIPTION[cmd.name], inline=False)
+    embed.add_field(name="사용법", value=cmd.usage)
+
+    return embed
 
 
 def initbot(bot):
@@ -66,11 +103,19 @@ def log_i(ctx):
 
 
 def log_e(ctx, error):
-    time = toKCT(datetime.datetime.now())
+    time = toKCT(datetime.datetime.utcnow())
     now = dt_to_str(time, True)
     print(f"[error/{now}] | {ctx.message.content} | {error}")
 
-def log_v(ctx, v):
-    time = toKCT(ctx.message.created_at)
+
+def log_v(ctx=None, v=None):
+    if ctx is None:
+        time = toKCT(datetime.datetime.utcnow())
+        content = ""
+    else:
+        time = toKCT(ctx.message.created_at)
+        content = ctx.message.content
+
     ca = dt_to_str(time, True)
-    print(f"[Vervose/{ca}] {ctx.message.content} | {v}")
+
+    print(f"[Verbose/{ca}] {content} | {v}")
