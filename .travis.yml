@@ -9,3 +9,7 @@ cache: pip
 script: 
   - flake8 src
   - python -m pytest -v tests
+notifications:
+  email:
+    on_success: never
+    on_failure: always
