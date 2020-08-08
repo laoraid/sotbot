@@ -25,7 +25,7 @@ class Game(commands.Cog):
         self.lastserverstat = ""
 
         sheet = openpyxl.load_workbook(
-            './islands.xlsx', data_only=True)['KOR']
+            './src/islands.xlsx', data_only=True)['KOR']
         i = 2
         self.islandspos = {}
         self.engislandpos = {}

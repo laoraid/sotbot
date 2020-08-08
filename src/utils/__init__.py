@@ -27,15 +27,15 @@ def mkhelpstr(cmd, *args):
     return f"``{CMD_PREFIX}{cmd}``{args}"
 
 
-def dt_to_str(date, inclue_timezone=False):
+def dt_to_str(date, include_timezone=False):
     tz = ""
-    if inclue_timezone:
+    if include_timezone:
         tz = " %Z%z"
     return date.strftime(f"%Y-%m-%d %H:%M:%S{tz}")
 
 
 def randcolor():
-    return random.randint(0, 255) ** 3
+    return random.randint(0, 16581375)
 
 
 helpembed = discord.Embed(title="명령어 리스트", color=0x2ba3ee)
