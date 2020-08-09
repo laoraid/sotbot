@@ -6,7 +6,7 @@ from discord.ext import commands
 import discord
 
 from . import utils
-from .config import CMD_PREFIX, EXTENSIONS, OWNER_ID, ALLOW_CHANNEL
+from .config import CMD_PREFIX, EXTENSIONS, OWNER_ID, ALLOWED_CHANNEL
 
 # endregion
 
@@ -17,7 +17,7 @@ bot.owner_id = OWNER_ID
 
 @bot.event
 async def on_message(msg):
-    if msg.channel.id not in ALLOW_CHANNEL:
+    if msg.channel.id not in ALLOWED_CHANNEL:
         return
     await bot.process_commands(msg)
 
@@ -39,7 +39,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandNotFound):
         utils.log_e(ctx, "없는 명령어")
         cmd = ctx.message.content.split(' ')[0][1:]
-        await ctx.send(f"``{cmd}`` 명령어는 없는 명령어입니다.")
+        await ctx.send(f"``{cmd}`` 명령어는 없는 명령어입니다. 도움말 : ``{CMD_PREFIX}도움말``")
     elif isinstance(error, commands.MissingRole):
         utils.log_e(ctx, "권한 부족")
         await ctx.send("권한이 부족합니다.")

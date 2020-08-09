@@ -16,5 +16,5 @@ for line in d:
     else:
         des += line.replace("{CMD_PREFIX}", CMD_PREFIX)
 
-ALLOW_CHANNEL = [635398034469158914, 738655532709183551]
+ALLOWED_CHANNEL = [635398034469158914, 738655532709183551]
 # test channel, gall discord channel

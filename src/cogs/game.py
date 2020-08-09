@@ -61,7 +61,9 @@ class Game(commands.Cog):
         else:
             islands = list(self.islandspos.keys())
 
-        substr = [x for x in islands if island in x.lower()]
+        substr = [x for x in islands if re.search(rf"\b{island}\b", x.lower())]
+        if len(substr) == 0:
+            substr = [x for x in islands if island in x.lower()]
 
         if (len(substr) == 0):
             clmat = difflib.get_close_matches(island, islands, cutoff=0.3)
