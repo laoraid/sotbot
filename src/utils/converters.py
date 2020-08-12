@@ -1,4 +1,5 @@
 import re
+import tossi
 
 from discord.ext import commands
 
@@ -16,8 +17,8 @@ class Animal(commands.Converter):
             return PIG
         elif arg in ["뱀", "snake", "스네이크"]:
             return SNAKE
-
-        raise commands.BadArgument(f"{arg} 는 동물 종류가 아닙니다.", arg)
+        un = tossi.postfix(arg, "은")
+        raise commands.BadArgument(f"{un} 동물 종류가 아닙니다.", arg)
 
 
 def convert_animal(infoarr):
@@ -50,6 +51,7 @@ class Position(commands.Converter):
         ispos = True if ispos is not None else False
 
         if not ispos:
-            raise commands.BadArgument(f"{arg}는 좌표가 아닙니다.", arg)
+            un = tossi.postfix(arg, "은")
+            raise commands.BadArgument(f"{un} 좌표가 아닙니다.", arg)
 
         return pos

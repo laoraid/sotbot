@@ -40,7 +40,7 @@ class Manage(commands.Cog):
         await ctx.send(f'{prevnick}의 닉네임이 {nick}으로 변경되었습니다.')
 
     @commands.command(hidden=True, help=mkhelpstr("역할부여", "역할이름"))
-    @commands.has_role("관리직")
+    @commands.has_permissions(administrator=True)
     async def 역할부여(self, ctx: commands.Context, r):
         guild = ctx.message.guild
         members = ctx.message.guild.members
@@ -52,13 +52,16 @@ class Manage(commands.Cog):
                 await member.add_roles(role)
 
     @commands.command(hidden=True)
-    @commands.has_role("관리직")
-    async def 봇말하기(self, ctx, title, value):
+    @commands.has_permissions(administrator=True)
+    async def 봇말하기(self, ctx, t, title, value):
         embed = discord.Embed(title=title, color=utils.randcolor())
         embed.add_field(name="내용", value=value)
 
-        for ch in ALLOWED_CHANNEL:
-            await self.bot.get_channel(ch).send(embed=embed)
+        if t == "갤":
+            ch = ALLOWED_CHANNEL[1]
+        else:
+            ch = ALLOWED_CHANNEL[0]
+        await self.bot.get_channel(ch).send(embed=embed)
 
 
 def setup(bot):
