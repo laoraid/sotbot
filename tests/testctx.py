@@ -4,9 +4,12 @@ import discord
 
 
 class message(object):
-    def __init__(self, msg):
+    def __init__(self, msg, ca=None):
         self.content = msg
-        self.created_at = datetime.utcnow()
+        if ca is not None:
+            self.created_at = ca
+        else:
+            self.created_at = datetime.utcnow()
 
 
 class ctx(object):

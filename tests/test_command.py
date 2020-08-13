@@ -1,5 +1,3 @@
-import asyncio
-
 import pytest
 
 from tests import testctx
@@ -67,8 +65,8 @@ async def test_server():
 
 def test_help():
     embed = utils.make_cmd_help_embed(g.동물)
-    ld=config.LONG_DESCRIPTIONS["동물"]
-    
+    ld = config.LONG_DESCRIPTIONS["동물"]
+
     usage = getattr(g.동물, "usage")
 
     assert embed.title == "동물 명령어"

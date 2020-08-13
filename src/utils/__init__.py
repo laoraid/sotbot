@@ -78,9 +78,6 @@ def memoize(pro=None):
 
 @memoize("name")
 def make_cmd_help_embed(cmd: commands.Command):
-    if type(cmd) == str:
-        cmd = viscomsdict[cmd]
-
     embed = discord.Embed(title=f"{cmd.name} 명령어", color=0xeec42b)
 
     embed.add_field(name="설명", value=LONG_DESCRIPTIONS[cmd.name], inline=False)
