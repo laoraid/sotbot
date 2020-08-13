@@ -39,7 +39,7 @@ if __name__ == "__main__":
             utils.log_e(ctx, "없는 명령어")
             cmd = ctx.message.content.split(' ')[0][1:]
             await ctx.send(f"``{cmd}`` 명령어는 없는 명령어입니다. "
-                           "도움말 : ``{CMD_PREFIX}도움말``")
+                           f"도움말 : ``{CMD_PREFIX}도움말``")
         elif isinstance(error, commands.MissingRole):
             utils.log_e(ctx, "권한 부족")
             await ctx.send("권한이 부족합니다.")
