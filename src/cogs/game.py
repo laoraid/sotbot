@@ -80,6 +80,20 @@ class Game(commands.Cog):
             utils.log_v(ctx, f"{origin} -> {island} (부분 문자열)")
         await ctx.send(embed=self.make_pos_embed(island, iseng))
 
+    def clr_region(self, region):
+        RED = 0xd22b55
+        GREEN = 0x05f445
+        GRAY = 0x7c828e
+
+        if region == "The Devil's Roar":
+            return RED
+        if region == "The Shores of Plenty":
+            return GREEN
+        if region == "The Wilds":
+            return GRAY
+
+        return utils.randcolor()
+
     def make_pos_embed(self, name, iseng):
         if iseng:
             pr = self.engislandpos[name]
@@ -88,7 +102,7 @@ class Game(commands.Cog):
         urlname = pr[2].replace(" ", "_")
         WIKI_URL = f"https://seaofthieves.gamepedia.com/{urlname}"
         embed = discord.Embed(title=name, url=WIKI_URL,
-                              color=utils.randcolor())
+                              color=self.clr_region(pr[1]))
         embed.add_field(name="좌표", value=pr[0], inline=True)
         embed.add_field(
             name="동물", value=converters.convert_animal(pr), inline=True)
