@@ -13,14 +13,14 @@ class Manage(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['help'], description='이 도움말을 출력합니다.')
-    async def 도움말(self, ctx, cmd):
-        if cmd == 'help' or cmd == "도움말":
+    async def 도움말(self, ctx, cmdname):
+        if cmdname == 'help' or cmdname == "도움말":
             await ctx.send(embed=utils.helpembed)
-        elif cmd in utils.viscomsdict:
-            cmd = utils.viscomsdict[cmd]
+        elif cmdname in utils.viscomsdict:
+            cmd = utils.viscomsdict[cmdname]
             await ctx.send(embed=utils.make_cmd_help_embed(cmd))
         else:
-            await ctx.send(f'``{cmd}`` 명령어를 찾을 수 없습니다.')
+            await ctx.send(f'``{cmdname}`` 명령어를 찾을 수 없습니다.')
 
     @commands.command(description="xbox 아이디가 포함되게 닉네임을 변경합니다.",
                       usage=mkhelpstr("아이디", "xboxid"))

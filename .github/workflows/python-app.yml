@@ -29,11 +29,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest-asyncio
+        pip install flake8 pytest-asyncio pytest-cov codecov
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
         flake8 src
     - name: Test with pytest
       run: |
-        python -m pytest -v tests
+        python -m pytest -v tests --cov=src
+    - name: CodeCov
+      run: codecov
