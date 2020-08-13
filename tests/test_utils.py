@@ -69,6 +69,9 @@ async def test_converter_animal():
     assert 5 == await a.convert(None, "스네이크")
     assert 5 == await a.convert(None, "뱀")
 
+    with pytest.raises(commands.BadArgument):
+        await a.convert(None, "asdafe")
+
 
 def test_conv_animal_str():
     assert "닭,돼지,뱀" == utils.converters.convert_animal([True] * 6)

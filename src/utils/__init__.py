@@ -18,13 +18,27 @@ def toKCT(date):
     return date.astimezone(KCT)
 
 
-def mkhelpstr(cmd, *args):
+def mkEmptyList(buffer):
+    return [None] * buffer
+
+
+def mkhelpstr(cmd, *args, aliases=None):
+    if aliases is None:
+        aliases = [cmd]
+    else:
+        aliases = [cmd] + aliases
+    helpstr = mkEmptyList(len(aliases))
+
     if len(args) != 0:
         args = "`` ``".join(args)
         args = f" ``{args}``"
     else:
         args = ""
-    return f"``{CMD_PREFIX}{cmd}``{args}"
+
+    for i, name in enumerate(aliases):
+        helpstr[i] = f"``{CMD_PREFIX}{name}``{args}"
+
+    return " 또는 ".join(helpstr)
 
 
 def dt_to_str(date, include_timezone=False):

@@ -48,7 +48,7 @@ class Game(commands.Cog):
             i += 1
 
     @commands.command(aliases=['pos'], description="섬의 좌표와 위키 링크를 출력합니다.",
-                      usage=mkhelpstr("좌표", "섬 이름"))
+                      usage=mkhelpstr("좌표", "섬 이름", aliases=["pos"]))
     async def 좌표(self, ctx, *, island):
         origin = island
         island = island.lower()
@@ -96,8 +96,8 @@ class Game(commands.Cog):
         embed.set_footer(text="섬 이름 클릭시 위키로 이동됨")
         return embed
 
-    @commands.command(description="서버 상태를 확인합니다. 쿨타임 3분",
-                      usage=mkhelpstr("서버"))
+    @commands.command(aliases=["server"], description="서버 상태를 확인합니다. 쿨타임 3분",
+                      usage=mkhelpstr("서버", aliases=["server"]))
     async def 서버(self, ctx):
         STATURL = "https://www.seaofthieves.com/ko/status"
         SERVER_IS_SICK = ":regional_indicator_x: 점검중이거나 서버가 터졌어요."
