@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 import openpyxl
 from bs4 import BeautifulSoup
+import tossi
 
 from ..utils import dt_to_str, mkhelpstr
 from .. import utils
@@ -215,7 +216,12 @@ class Game(commands.Cog):
             utils.log_v(ctx, "조건에 맞는 섬 검색 실패")
             return None
 
-        await ctx.send(embed=self.make_pos_embed(island, False))
+        animalstrs = [converters.decode_animal(x) for x in n]
+        animalstrs = f"``{', '.join(animalstrs)}``"
+        animalstrs = tossi.postfix(animalstrs, "이")
+
+        await ctx.send(f"``{p}``에서 {animalstrs} 있는 가장 가까운 섬은...",
+                       embed=self.make_pos_embed(island, False))
 
     @동물.error
     async def animal_error(self, ctx, error):

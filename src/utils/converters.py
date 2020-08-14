@@ -42,6 +42,16 @@ def convert_animal(infoarr):
     return r
 
 
+def decode_animal(a):
+    if a == CHICKEN:
+        return "닭"
+    elif a == SNAKE:
+        return "뱀"
+    elif a == PIG:
+        return "돼지"
+    raise ValueError
+
+
 class Position(commands.Converter):
     async def convert(self, ctx, arg):
         pos = arg.upper()
