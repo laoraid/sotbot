@@ -58,7 +58,7 @@ class Server(commands.Cog):
     @tasks.loop(seconds=60)
     async def clearchannel(self):
         for i, g in enumerate(ADD_CATEGORIES):
-            guild = self.bot.get_channel(ALLOWED_CHANNEL[i]).guild
+            guild = self.bot.guilds[0]
             for catid in g:
                 cat = discord.utils.get(guild.categories, id=catid)
                 vcs = cat.voice_channels
