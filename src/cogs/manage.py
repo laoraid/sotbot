@@ -50,6 +50,17 @@ class Manage(commands.Cog):
             if admin not in member.roles and not member.bot:
                 await member.add_roles(role)
 
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def 카테고리(self, ctx):
+        guild = ctx.message.guild
+        categories = guild.categories
+
+        s = []
+        for cat in categories:
+            s.append(f"{cat.name} / {cat.id}\n")
+
+        await ctx.send("".join(s))
 
 def setup(bot):
     bot.add_cog(Manage(bot))
