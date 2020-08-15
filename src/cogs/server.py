@@ -6,7 +6,8 @@ from discord.ext import commands, tasks
 import tossi
 
 from ..utils.converters import Ship
-from ..config import ALLOWED_CHANNEL, CATEGORIES, OWNER_ID, ADD_CATEGORIES
+from ..config import (ALLOWED_CHANNEL, CATEGORIES, OWNER_ID,
+                      ADD_CATEGORIES, DEBUG_MODE)
 from .. import utils
 from ..utils import mkhelpstr
 
@@ -57,17 +58,21 @@ class Server(commands.Cog):
 
     @tasks.loop(seconds=60)
     async def clearchannel(self):
-        for i, g in enumerate(ADD_CATEGORIES):
-            guild = self.bot.guilds[0]
-            for catid in g:
-                cat = discord.utils.get(guild.categories, id=catid)
-                vcs = cat.voice_channels
+        if DEBUG_MODE:
+            cats = CATEGORIES[0]
+        else:
+            cats = CATEGORIES[1]
 
-                for vc in vcs:
-                    if len(vc.members) == 0:
-                        chname = vc.name
-                        await vc.delete()
-                        utils.log_v(None, f"{chname} 채널 삭제됨")
+        guild = self.bot.guilds[0]
+        for catid in cats:
+            cat = discord.utils.get(guild.categories, id=catid)
+            vcs = cat.voice_channels
+
+            for vc in vcs:
+                if len(vc.members) == 0:
+                    chname = vc.name
+                    await vc.delete()
+                    utils.log_v(None, f"{chname} 채널 삭제됨")
 
     @clearchannel.before_loop
     async def before_clearchannel(self):
