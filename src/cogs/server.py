@@ -85,9 +85,10 @@ class Server(commands.Cog):
         print(trace)
         await self.bot.get_user(OWNER_ID).send(f"채널 청소 에러\n{trace}")
 
-    @commands.command(description="배 종류 별로 보이스 채널을 만듭니다.",
+    @commands.command(hidden=True, description="배 종류 별로 보이스 채널을 만듭니다.",
                       usage=mkhelpstr("출항", "배 종류"))
     @commands.guild_only()
+    @commands.is_owner()
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def 출항(self, ctx, ship: Ship):
         author = ctx.message.author
