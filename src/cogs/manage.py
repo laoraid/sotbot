@@ -62,5 +62,6 @@ class Manage(commands.Cog):
 
         await ctx.send("".join(s))
 
+
 def setup(bot):
     bot.add_cog(Manage(bot))
