@@ -55,3 +55,20 @@ class Position(commands.Converter):
             raise commands.BadArgument(f"{un} 좌표가 아닙니다.", arg)
 
         return pos
+
+
+GALLEON = 0
+BRIG = 1
+SLOOP = 2
+
+
+class Ship(commands.Converter):
+    async def convert(self, ctx, arg):
+        arg = arg.lower()
+
+        if arg in ["갤리온", "갤리언", "galleon"]:
+            return {"name": "갤리온", "id": GALLEON}
+        elif arg in ["브리건틴", "브리건타인", "브리간틴", "brigantine"]:
+            return {"name": "브리건틴", "id": BRIG}
+        elif arg in ["슬루프", "sloop"]:
+            return {"name": "슬루프", "id": SLOOP}

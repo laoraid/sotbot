@@ -5,7 +5,6 @@ from discord.ext import commands
 
 from .. import utils
 from ..utils import mkhelpstr
-from ..config import ALLOWED_CHANNEL
 
 
 class Manage(commands.Cog):
@@ -50,18 +49,6 @@ class Manage(commands.Cog):
         for member in members:
             if admin not in member.roles and not member.bot:
                 await member.add_roles(role)
-
-    @commands.command(hidden=True)
-    @commands.has_permissions(administrator=True)
-    async def 봇말하기(self, ctx, t, title, value):
-        embed = discord.Embed(title=title, color=utils.randcolor())
-        embed.add_field(name="내용", value=value)
-
-        if t == "갤":
-            ch = ALLOWED_CHANNEL[1]
-        else:
-            ch = ALLOWED_CHANNEL[0]
-        await self.bot.get_channel(ch).send(embed=embed)
 
 
 def setup(bot):

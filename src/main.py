@@ -1,12 +1,10 @@
 # region imports
-import os
-import traceback
-
 from discord.ext import commands
 import discord
 
 from . import utils
-from .config import CMD_PREFIX, EXTENSIONS, OWNER_ID, ALLOWED_CHANNEL
+from .config import (CMD_PREFIX, EXTENSIONS, OWNER_ID,
+                     ALLOWED_CHANNEL, BOT_TOKEN)
 
 # endregion
 
@@ -36,31 +34,27 @@ if __name__ == "__main__":
             else:
                 await ctx.send(embed=utils.make_cmd_help_embed(ctx.command))
         elif isinstance(error, commands.CommandNotFound):
-            utils.log_e(ctx, "없는 명령어")
+            utils.log_e(ctx, error="없는 명령어")
             cmd = ctx.message.content.split(' ')[0][1:]
             await ctx.send(f"``{cmd}`` 명령어는 없는 명령어입니다. "
                            f"도움말 : ``{CMD_PREFIX}도움말``")
         elif isinstance(error, commands.MissingRole):
-            utils.log_e(ctx, "권한 부족")
+            utils.log_e(ctx, error="권한 부족")
             await ctx.send("권한이 부족합니다.")
         elif isinstance(error, commands.BadArgument):
             pass  # 명령어 개별 처리
+        elif isinstance(error, commands.CommandOnCooldown):
+            utils.log_e(ctx, error="커맨드 쿨다운 상태")
+            await ctx.send(f"{ctx.message.author.mention} 명령어 쿨타임입니다."
+                           f" {error.retry_after:0.1f}초 뒤에 사용하세요.")
         else:
-            utils.log_e(ctx, error)
+            utils.log_e(ctx, error=error)
             owner = f"<@!{bot.owner_id}>"
             await ctx.send(f"에러가 발생했습니다. {owner}에게 문의하세요.")
-            trace = traceback.format_exception(
-                type(error), error, error.__traceback__)
-            trace = "".join(trace)
+            trace = utils.get_traceback(error)
             print(trace)
             await bot.get_user(OWNER_ID).send(
                 f"{ctx.message.content}\n{trace}")
-
-    try:
-        BOT_TOKEN = os.environ['BOT_TOKEN']
-    except KeyError:
-        from . import bottoken
-        BOT_TOKEN = bottoken.TOKEN
 
     bot.remove_command('help')
 
