@@ -16,8 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - env:
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      env:
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
       with:
