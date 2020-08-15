@@ -59,9 +59,9 @@ class Server(commands.Cog):
     @tasks.loop(seconds=60)
     async def clearchannel(self):
         if DEBUG_MODE:
-            cats = CATEGORIES[0]
+            cats = ADD_CATEGORIES[0]
         else:
-            cats = CATEGORIES[1]
+            cats = ADD_CATEGORIES[1]
 
         guild = self.bot.guilds[0]
         for catid in cats:
