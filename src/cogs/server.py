@@ -128,7 +128,8 @@ class Server(commands.Cog):
         elif not emptychexist:
             pick = tossi.pick(name, "으로")
             await ctx.send(f"{author.mention} 대기방에 있는 상태로 명령어를 입력하지 않으면"
-                           f" 채널 생성 즉시 채널이 사라질 수도 있어요. ``{name}``{pick} 입장하세요.")
+                           f" 채널 생성 즉시 채널이 사라질 수도 있어요."
+                           f" ``{name}``{pick} 입장하세요.")
 
 
 def setup(bot):
