@@ -226,7 +226,7 @@ class Game(commands.Cog):
     @동물.error
     async def animal_error(self, ctx, error):
         if isinstance(error, commands.BadArgument):
-            utils.log_e(ctx, error.args[0])
+            utils.log_e(ctx, error=error.args[0])
             await ctx.send(error.args[0])
 
 

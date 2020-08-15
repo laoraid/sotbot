@@ -2,6 +2,7 @@ import datetime
 import pytz
 from functools import wraps
 import random
+import traceback
 
 import discord
 from discord.ext import commands
@@ -114,10 +115,14 @@ def log_i(ctx):
     print(f"[info/{ca}] {ctx.author} | {ctx.message.content}")
 
 
-def log_e(ctx, error):
+def log_e(ctx=None, *, error):
     time = toKCT(datetime.datetime.utcnow())
     now = dt_to_str(time, True)
-    print(f"[error/{now}] | {ctx.message.content} | {error}")
+    if ctx is None:
+        content = error
+    else:
+        content = f"{ctx.message.content} | {error}"
+    print(f"[error/{now}] | {content}")
 
 
 def log_v(ctx=None, v=None):
@@ -131,3 +136,10 @@ def log_v(ctx=None, v=None):
     ca = dt_to_str(time, True)
 
     print(f"[Verbose/{ca}] {content} | {v}")
+
+
+def get_traceback(error):
+    trace = traceback.format_exception(
+        type(error), error, error.__traceback__)
+    trace = "".join(trace)
+    return trace
