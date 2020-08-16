@@ -7,7 +7,7 @@ import tossi
 
 from ..utils.converters import Ship
 from ..config import (ALLOWED_CHANNEL, CATEGORIES, OWNER_ID,
-                      ADD_CATEGORIES, DEBUG_MODE)
+                      ADD_CATEGORIES)
 from .. import utils
 from ..utils import mkhelpstr
 
