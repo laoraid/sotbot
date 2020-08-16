@@ -58,14 +58,11 @@ class Server(commands.Cog):
 
     @tasks.loop(seconds=60)
     async def clearchannel(self):
-        if DEBUG_MODE:
-            cats = ADD_CATEGORIES[0]
-        else:
-            cats = ADD_CATEGORIES[1]
-
         guild = self.bot.guilds[0]
-        for catid in cats:
+        for catid in ADD_CATEGORIES:
             cat = discord.utils.get(guild.categories, id=catid)
+            if cat is None:
+                continue
             vcs = cat.voice_channels
 
             for vc in vcs:
@@ -85,10 +82,8 @@ class Server(commands.Cog):
         print(trace)
         await self.bot.get_user(OWNER_ID).send(f"채널 청소 에러\n{trace}")
 
-    @commands.command(hidden=True, description="배 종류 별로 보이스 채널을 만듭니다.",
+    @commands.command(description="배 종류 별로 보이스 채널을 만듭니다.",
                       usage=mkhelpstr("출항", "배 종류"))
-    @commands.guild_only()
-    @commands.is_owner()
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def 출항(self, ctx, ship: Ship):
         author = ctx.message.author
@@ -108,7 +103,6 @@ class Server(commands.Cog):
         origincat = self._get_cat_by_ch(ctx.channel, ship["id"])
         cat = self._get_cat_by_ch(ctx.channel, ship["id"], True)
         emptych = [x for x in origincat.voice_channels if len(x.members) == 0]
-        emptych = []  # TODO
         emptych.extend([x for x in cat.voice_channels if len(x.members) == 0])
 
         if len(emptych):
