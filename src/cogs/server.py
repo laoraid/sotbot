@@ -159,9 +159,9 @@ class Server(commands.Cog):
                 await member.add_roles(role)
 
     @commands.command(hidden=True)
-    @commands.is_owner
+    @commands.is_owner()
     async def 테스트2(self, ctx, arg):
-        await ctx.send(f"{arg} / 테스트 성공!")
+        await ctx.send(f"{arg} / 테스트 성공!2")
 
 def setup(bot):
     bot.add_cog(Server(bot))
