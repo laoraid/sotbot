@@ -19,9 +19,9 @@ jobs:
     - name: ssh
       uses: appleboy/ssh-action@master
       with:
-      host: ${{ secrets.GCE_HOST }}
-      username: ${{ secrets.GCE_USERNAME }}
-      password: ${{ secrets.GCE_PASSWORD }}
+        host: ${{ secrets.GCE_HOST }}
+        username: ${{ secrets.GCE_USERNAME }}
+        key: ${{ secrets.GCE_KEY }}
       script: |
         cd ${{ secrets.REPO_PATH }} && git pull
         source env/bin/activate
