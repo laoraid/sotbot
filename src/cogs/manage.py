@@ -18,6 +18,10 @@ class Manage(commands.Cog):
         else:
             await ctx.send(f'{cb(cmdname)} 명령어를 찾을 수 없습니다.')
 
+    @commands.command(hidden=True)
+    async def 테스트(self, ctx):
+        await ctx.send("테스트 성공")
+
 
 def setup(bot):
     bot.add_cog(Manage(bot))
