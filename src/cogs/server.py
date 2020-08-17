@@ -68,7 +68,7 @@ class Server(commands.Cog):
 
     @clearchannel.error
     async def clearchannel_error(self, error):
-        utils.log_e(error=error)
+        Log.e(error=error)
         trace = utils.get_traceback(error)
         print(trace)
         await self.bot.get_user(OWNER_ID).send(f"채널 청소 에러\n{trace}")
@@ -89,19 +89,19 @@ class Server(commands.Cog):
                 ctx.command.reset_cooldown(ctx)
                 return None
         else:
-            voice = False
+            invoice = False
 
         origincat = self._get_cat_by_ch(ctx.channel, ship["id"])
         cat = self._get_cat_by_ch(ctx.channel, ship["id"], True)
         emptych = [x for x in origincat.voice_channels if len(x.members) == 0]
         emptych.extend([x for x in cat.voice_channels if len(x.members) == 0])
 
-        if len(emptych):
+        if len(emptych):  # check empty channel
             emptychexist = True
             name = emptych[0].name
-            name = tossi.postfix(name, "이")
 
             ch = discord.utils.get(emptych, name=name)
+            name = tossi.postfix(f"{cb(name)}", "이")
             await ctx.send(f"{author.mention} 이미 비어있는 방 {name} 있어요.")
             ctx.command.reset_cooldown(ctx)
         else:
@@ -112,15 +112,46 @@ class Server(commands.Cog):
                 name = f"추가 {ship['name']} - {num}"
 
                 ch = await self._make_ch(cat, name, num - 1)
-                utils.log_v(ctx, f"채널 {name} 생성됨")
+                Log.v(ctx, f"채널 {name} 생성됨")
+                name = tossi.postfix(f"{cb(name)}", "이")
+                await ctx.send(f"채널 {name} 생성되었습니다.")
 
-        if voice:
+        if invoice:
             await author.move_to(ch)
         elif not emptychexist:
-            pick = tossi.pick(name, "으로")
+            name = tossi.postfix(name, "으로")
             await ctx.send(f"{author.mention} 대기방에 있는 상태로 명령어를 입력하지 않으면"
                            f" 채널 생성 즉시 채널이 사라질 수도 있어요."
-                           f" ``{name}``{pick} 입장하세요.")
+                           f" {name} 입장하세요.")
+
+    @commands.command(description="xbox 아이디가 포함되게 닉네임을 변경합니다.",
+                      usage=mkhelpstr("아이디", "xboxid"))
+    async def 아이디(self, ctx, *, id):
+        prevnick = ctx.author.display_name
+
+        pattern = r'(?P<nickname>\S+)\s*\(.+\)'
+
+        mat = re.match(pattern, prevnick)
+
+        if mat is not None:
+            nick = f'{mat.group("nickname")}({id})'
+        else:
+            nick = f'{prevnick}({id})'
+
+        await ctx.author.edit(nick=nick)
+        await ctx.send(f'{prevnick}의 닉네임이 {nick}으로 변경되었습니다.')
+
+    @commands.command(hidden=True, help=mkhelpstr("역할부여", "역할이름"))
+    @commands.has_permissions(administrator=True)
+    async def 역할부여(self, ctx: commands.Context, r):
+        guild = ctx.message.guild
+        members = ctx.message.guild.members
+        role = discord.utils.get(guild.roles, name=r)
+        admin = discord.utils.get(guild.roles, name="관리직")
+
+        for member in members:
+            if admin not in member.roles and not member.bot:
+                await member.add_roles(role)
 
 
 def setup(bot):
