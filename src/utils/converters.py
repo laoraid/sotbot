@@ -82,3 +82,6 @@ class Ship(commands.Converter):
             return {"name": "브리건틴", "id": BRIG}
         elif arg in ["슬루프", "sloop"]:
             return {"name": "슬루프", "id": SLOOP}
+
+        arg = tossi.postfix(arg, "는")
+        raise commands.BadArgument(f"{arg} 배 종류가 아닙니다.")
