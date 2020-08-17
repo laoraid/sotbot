@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from discord.ext import commands
 
 from .. import utils
@@ -19,8 +22,28 @@ class Manage(commands.Cog):
             await ctx.send(f'{cb(cmdname)} 명령어를 찾을 수 없습니다.')
 
     @commands.command(hidden=True)
-    async def 테스트(self, ctx):
-        await ctx.send("테스트 성공")
+    @commands.is_owner()
+    async def load(self, ctx, *, m):
+        self.bot.load_extension(m)
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def unload(self, ctx, *, m):
+        self.bot.unload_extension(m)
+
+    @commands.command(name="reload", hidden=True)
+    @commands.is_owner()
+    async def _reload(self, ctx, *, m):
+        self.bot.unload_extension(m)
+        filepath = f"{m.replace('.', '/')}.py"
+        filename = os.path.basename(filepath)
+        change_file(filename, filepath)
+        self.bot.load_extension(m)
+
+def change_file(filename, filepath):
+    srcdir = os.environ["BOT_GIT_PATH"]
+    srcfile = os.path.join(srcdir, filepath)
+    shutil.copy(srcfile, filepath)
 
 
 def setup(bot):
