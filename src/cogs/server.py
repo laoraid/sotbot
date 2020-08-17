@@ -6,10 +6,9 @@ from discord.ext import commands, tasks
 import tossi
 
 from ..utils.converters import Ship
-from ..config import (ALLOWED_CHANNEL, CATEGORIES, OWNER_ID,
-                      ADD_CATEGORIES)
+from ..config import CATEGORIES, OWNER_ID, ADD_CATEGORIES
 from .. import utils
-from ..utils import mkhelpstr
+from ..utils import mkhelpstr, Log, cb
 
 
 class Server(commands.Cog):
@@ -19,20 +18,14 @@ class Server(commands.Cog):
         self.clearchannel.start()
         self.lock = asyncio.Lock()
 
-    def _cats_by_ch(self, ch, add=False):
-        if ch.id in ALLOWED_CHANNEL:
-            if not add:
-                idx = ALLOWED_CHANNEL.index(ch.id)
-                return CATEGORIES[idx]
-            else:
-                idx = ALLOWED_CHANNEL.index(ch.id)
-                return ADD_CATEGORIES[idx]
-        else:
-            raise ValueError
+    def _get_cats_by_guildID(self, guildid, add=False):
+        if not add:
+            return CATEGORIES[guildid]
+        return ADD_CATEGORIES[guildid]
 
-    def _get_cat_by_ch(self, ch, ship, add=False):
-        catsid = self._cats_by_ch(ch, add)[ship]
-        return discord.utils.get(ch.guild.categories, id=catsid)
+    def _get_cat_by_ch(self, ch, shipidx, add=False):
+        ct = self._get_cats_by_guildID(ch.guild.id, add)
+        return discord.utils.get(ch.guild.categories, id=ct[shipidx])
 
     async def _make_ch(self, cat, name, pos):
         ch = await cat.create_voice_channel(name)
@@ -45,7 +38,6 @@ class Server(commands.Cog):
 
     def _get_empty_num(self, cat):
         chnames = [x.name for x in cat.voice_channels]
-
         num = 1
 
         for name in chnames:
@@ -58,18 +50,17 @@ class Server(commands.Cog):
 
     @tasks.loop(seconds=60)
     async def clearchannel(self):
-        guild = self.bot.guilds[0]
-        for catid in ADD_CATEGORIES:
-            cat = discord.utils.get(guild.categories, id=catid)
-            if cat is None:
-                continue
-            vcs = cat.voice_channels
+        for guild in self.bot.guilds:
+            cats = self._get_cats_by_guildID(guild.id, add=True)
+            for catid in cats:
+                cat = discord.utils.get(guild.categories, id=catid)
+                vcs = cat.voice_channels
 
-            for vc in vcs:
-                if len(vc.members) == 0:
-                    chname = vc.name
-                    await vc.delete()
-                    utils.log_v(None, f"{chname} 채널 삭제됨")
+                for vc in vcs:
+                    if len(vc.members) == 0:
+                        chname = vc.name
+                        await vc.delete()
+                        Log.v(None, f"{chname} 채널 삭제됨")
 
     @clearchannel.before_loop
     async def before_clearchannel(self):
@@ -87,8 +78,8 @@ class Server(commands.Cog):
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def 출항(self, ctx, ship: Ship):
         author = ctx.message.author
-        if author.voice is not None:
-            voice = True
+        if author.voice is not None:  # check already in ship channel
+            invoice = True
             chname = author.voice.channel.name
             m = self._regex_voicech(chname)
 
