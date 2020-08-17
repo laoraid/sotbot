@@ -10,9 +10,8 @@ import openpyxl
 from bs4 import BeautifulSoup
 import tossi
 
-from ..utils import dt_to_str, mkhelpstr
+from ..utils import dt_to_str, mkhelpstr, Log, converters, cb
 from .. import utils
-from ..utils import converters
 from ..config import CMD_PREFIX
 
 RELOAD_TIME = datetime.timedelta(minutes=3)
@@ -69,22 +68,23 @@ class Game(commands.Cog):
         if (len(substr) == 0):
             clmat = difflib.get_close_matches(island, islands, cutoff=0.3)
             if (len(clmat) == 0):
-                await ctx.send(f"``{island}`` 섬을 찾을 수 없습니다.")
-                utils.log_v(ctx, f"{island} 검색 실패")
+                await ctx.send(f"{cb(island)} 섬을 찾을 수 없습니다.")
+                Log.v(ctx, f"{island} 검색 실패")
                 return None
             else:
                 island = clmat[0]
                 ratio = difflib.SequenceMatcher(None, origin, island).ratio()
-                utils.log_v(ctx, f"{origin} -> {island} (유사도 : {ratio:.2f})")
+                Log.v(ctx, f"{origin} -> {island} (유사도 : {ratio:.2f})")
         else:
             island = substr[0]
-            utils.log_v(ctx, f"{origin} -> {island} (부분 문자열)")
+            Log.v(ctx, f"{origin} -> {island} (부분 문자열)")
         await ctx.send(embed=self.make_pos_embed(island, iseng))
 
     def clr_region(self, region):
         RED = 0xd22b55
         GREEN = 0x05f445
         GRAY = 0x7c828e
+        PURPLE = 0x620062
 
         if region == "The Devil's Roar":
             return RED
@@ -92,6 +92,8 @@ class Game(commands.Cog):
             return GREEN
         if region == "The Wilds":
             return GRAY
+        if region == "The Ancient Isles":
+            return PURPLE
 
         return utils.randcolor()
 
@@ -138,12 +140,12 @@ class Game(commands.Cog):
                     if res.status == 200:
                         soup = BeautifulSoup(await res.text(), 'html.parser')
                     elif res.status != 200 or res is None:
-                        utils.log_v(ctx, "서버 상태 확인 불가")
+                        Log.v(ctx, "서버 상태 확인 불가")
                         self.lastserverstat = SERVER_UNKNOWN
                         await ctx.send(self.lastserverstat)
                         return None
 
-            utils.log_v(ctx, "서버 상태 불러옴")
+            Log.v(ctx, "서버 상태 불러옴")
             srvinfo = soup.find("div", {"class": "service__info"})
             text = srvinfo.find("h2").contents[0]
 
@@ -154,13 +156,13 @@ class Game(commands.Cog):
             else:
                 self.lastserverstat = SERVER_UNKNOWN
         else:
-            utils.log_v(ctx, f"이전 상태 불러옴 {cachetime}")
+            Log.v(ctx, f"이전 상태 불러옴 {cachetime}")
         lctstr = dt_to_str(self.lastchktime)
 
         if msg is not None:
             await msg.delete()
 
-        await ctx.send(f"{self.lastserverstat} 확인 시간 : ``{lctstr}``")
+        await ctx.send(f"{self.lastserverstat} 확인 시간 : {cb(lctstr)}")
 
     def _calc_distance(self, pos, animals):
         def get_int(pos):
@@ -198,7 +200,7 @@ class Game(commands.Cog):
                 distemp = dis
                 numtemp = i
 
-        utils.log_v(None, f"{pos}에서 {islands[numtemp][0]}, 거리 : {distemp}")
+        Log.v(None, f"{pos}에서 {islands[numtemp][0]}, 거리 : {distemp}")
 
         return islands[numtemp][0]
 
@@ -211,23 +213,19 @@ class Game(commands.Cog):
                 f"동물 이름을 알 수 없습니다.\nEX) {CMD_PREFIX}동물 E21 닭 돼지")
         island = self._calc_distance(p, n)
 
+        n = set(n)
+
         if island is None:
             await ctx.send("조건에 맞는 섬을 찾을 수 없습니다.")
-            utils.log_v(ctx, "조건에 맞는 섬 검색 실패")
+            Log.v(ctx, "조건에 맞는 섬 검색 실패")
             return None
 
         animalstrs = [converters.decode_animal(x) for x in n]
-        animalstrs = f"``{', '.join(animalstrs)}``"
+        animalstrs = f"{cb(', '.join(animalstrs))}"
         animalstrs = tossi.postfix(animalstrs, "이")
 
-        await ctx.send(f"``{p}``에서 {animalstrs} 있는 가장 가까운 섬은...",
+        await ctx.send(f"{cb(p)}에서 {animalstrs} 있는 가장 가까운 섬은...",
                        embed=self.make_pos_embed(island, False))
-
-    @동물.error
-    async def animal_error(self, ctx, error):
-        if isinstance(error, commands.BadArgument):
-            utils.log_e(ctx, error=error.args[0])
-            await ctx.send(error.args[0])
 
 
 def setup(bot):

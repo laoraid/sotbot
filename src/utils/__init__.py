@@ -1,4 +1,3 @@
-import datetime
 import pytz
 from functools import wraps
 import random
@@ -102,40 +101,7 @@ def make_cmd_help_embed(cmd: commands.Command):
 
 
 def initbot(bot):
-    @bot.before_invoke
-    async def inner(ctx):
-        log_i(ctx)
     make_help_embed(bot)
-    return inner
-
-
-def log_i(ctx):
-    time = toKCT(ctx.message.created_at)
-    ca = dt_to_str(time, True)
-    print(f"[info/{ca}] {ctx.author} | {ctx.message.content}")
-
-
-def log_e(ctx=None, *, error):
-    time = toKCT(datetime.datetime.utcnow())
-    now = dt_to_str(time, True)
-    if ctx is None:
-        content = error
-    else:
-        content = f"{ctx.message.content} | {error}"
-    print(f"[error/{now}] | {content}")
-
-
-def log_v(ctx=None, v=None):
-    if ctx is None:
-        time = toKCT(datetime.datetime.utcnow())
-        content = ""
-    else:
-        time = toKCT(ctx.message.created_at)
-        content = ctx.message.content
-
-    ca = dt_to_str(time, True)
-
-    print(f"[Verbose/{ca}] {content} | {v}")
 
 
 def get_traceback(error):
@@ -143,3 +109,7 @@ def get_traceback(error):
         type(error), error, error.__traceback__)
     trace = "".join(trace)
     return trace
+
+
+def cb(string):
+    return f"`{string}`"
