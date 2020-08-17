@@ -22,7 +22,7 @@ jobs:
         host: ${{ secrets.GCE_HOST }}
         username: ${{ secrets.GCE_USERNAME }}
         key: ${{ secrets.GCE_KEY }}
-      script: |
-        cd ${{ secrets.REPO_PATH }} && git pull
-        source env/bin/activate
-        pip3 install -r requirements.txt
+        script: |
+          cd ${{ secrets.REPO_PATH }} && git pull
+          source env/bin/activate
+          pip3 install -r requirements.txt
