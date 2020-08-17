@@ -42,6 +42,7 @@ class Manage(commands.Cog):
 
 def change_file(filename, filepath):
     srcdir = os.environ["BOT_GIT_PATH"]
+    srcdir = os.path.expanduser(srcdir)
     srcfile = os.path.join(srcdir, filepath)
     shutil.copy(srcfile, filepath)
 
