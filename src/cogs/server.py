@@ -11,6 +11,41 @@ from .. import utils
 from ..utils import mkhelpstr, Log, cb
 
 
+def _get_cats_by_guildID(guildid, add=False):
+    if not add:
+        return CATEGORIES[guildid]
+    return ADD_CATEGORIES[guildid]
+
+
+def _get_cat_by_ch(ch, shipidx, add=False):
+    ct = _get_cats_by_guildID(ch.guild.id, add)
+    return discord.utils.get(ch.guild.categories, id=ct[shipidx])
+
+
+async def _make_ch(cat, name, pos):
+    ch = await cat.create_voice_channel(name)
+    await ch.edit(position=pos)
+    return ch
+
+
+def _regex_voicech(chname):
+    p = r"(추가 )?(?P<name>\D+)\s-\s(?P<num>\d+)"
+    return re.match(p, chname)
+
+
+def _get_empty_num(cat):
+    chnames = [x.name for x in cat.voice_channels]
+    num = 1
+
+    for name in chnames:
+        m = _regex_voicech(name)
+        if m.group("num") != str(num):
+            return num
+        num += 1
+
+    return num
+
+
 class Server(commands.Cog):
     def __init__(self, bot: commands.Bot):
         # pylint: disable=no-member
@@ -18,40 +53,10 @@ class Server(commands.Cog):
         self.clearchannel.start()
         self.lock = asyncio.Lock()
 
-    def _get_cats_by_guildID(self, guildid, add=False):
-        if not add:
-            return CATEGORIES[guildid]
-        return ADD_CATEGORIES[guildid]
-
-    def _get_cat_by_ch(self, ch, shipidx, add=False):
-        ct = self._get_cats_by_guildID(ch.guild.id, add)
-        return discord.utils.get(ch.guild.categories, id=ct[shipidx])
-
-    async def _make_ch(self, cat, name, pos):
-        ch = await cat.create_voice_channel(name)
-        await ch.edit(position=pos)
-        return ch
-
-    def _regex_voicech(self, chname):
-        p = r"[추가 ]?(?P<name>\D+)\s-\s(?P<num>\d+)"
-        return re.match(p, chname)
-
-    def _get_empty_num(self, cat):
-        chnames = [x.name for x in cat.voice_channels]
-        num = 1
-
-        for name in chnames:
-            m = self._regex_voicech(name)
-            if m.group("num") != str(num):
-                return num
-            num += 1
-
-        return num
-
     @tasks.loop(seconds=60)
     async def clearchannel(self):
         for guild in self.bot.guilds:
-            cats = self._get_cats_by_guildID(guild.id, add=True)
+            cats = _get_cats_by_guildID(guild.id, add=True)
             for catid in cats:
                 cat = discord.utils.get(guild.categories, id=catid)
                 vcs = cat.voice_channels
@@ -81,7 +86,7 @@ class Server(commands.Cog):
         if author.voice is not None:  # check already in ship channel
             invoice = True
             chname = author.voice.channel.name
-            m = self._regex_voicech(chname)
+            m = _regex_voicech(chname)
 
             if m is not None:
                 await ctx.send(f"{author.mention} 이미 채널에 있어요."
@@ -91,8 +96,8 @@ class Server(commands.Cog):
         else:
             invoice = False
 
-        origincat = self._get_cat_by_ch(ctx.channel, ship["id"])
-        cat = self._get_cat_by_ch(ctx.channel, ship["id"], True)
+        origincat = _get_cat_by_ch(ctx.channel, ship["id"])
+        cat = _get_cat_by_ch(ctx.channel, ship["id"], True)
         emptych = [x for x in origincat.voice_channels if len(x.members) == 0]
         emptych.extend([x for x in cat.voice_channels if len(x.members) == 0])
 
@@ -106,12 +111,12 @@ class Server(commands.Cog):
             ctx.command.reset_cooldown(ctx)
         else:
             async with self.lock:
-                num = self._get_empty_num(cat)
+                num = _get_empty_num(cat)
 
                 emptychexist = False
                 name = f"추가 {ship['name']} - {num}"
 
-                ch = await self._make_ch(cat, name, num - 1)
+                ch = await _make_ch(cat, name, num - 1)
                 Log.v(ctx, f"채널 {name} 생성됨")
                 name = tossi.postfix(f"{cb(name)}", "이")
                 await ctx.send(f"채널 {name} 생성되었습니다.")

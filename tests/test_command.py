@@ -1,8 +1,7 @@
 import pytest
 
 from tests import testctx
-from src.cogs import game
-from src.cogs import manage
+from src.cogs import game, manage
 from src import utils
 from src import config
 

@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from src import utils
 from src.config import CMD_PREFIX
+from src.cogs import server
 
 
 def test_mkhelpstr():
@@ -62,15 +63,27 @@ def test_mkhelpembed():
 async def test_converter_animal():
     a = utils.converters.Animal()
 
-    assert 3 == await a.convert(None, "chickEn")
+    ck = await a.convert(None, "chickEn")
+    assert 3 == ck
+    assert "닭" == utils.converters.decode_animal(ck)
+
     assert 3 == await a.convert(None, "닭")
-    assert 5 == await a.convert(None, "snAke")
-    assert 4 == await a.convert(None, "돼지")
+
+    sn = await a.convert(None, "snAke")
+    assert 5 == sn
+    assert "뱀" == utils.converters.decode_animal(sn)
+
+    pig = await a.convert(None, "돼지")
+    assert 4 == pig
+    assert "돼지" == utils.converters.decode_animal(pig)
+
     assert 5 == await a.convert(None, "스네이크")
     assert 5 == await a.convert(None, "뱀")
 
     with pytest.raises(commands.BadArgument):
         await a.convert(None, "asdafe")
+    with pytest.raises(ValueError):
+        utils.converters.decode_animal(0)
 
 
 def test_conv_animal_str():
@@ -91,3 +104,37 @@ async def test_converter_pos():
         await p.convert(None, "www1")
         await p.convert(None, "A-29")
         await p.convert(None, "q39")
+
+
+def test_regex_voicech():
+    c1 = "추가 슬루프 - 213"
+    c2 = "브리건틴 - 2"
+    c3 = "추가 갤리온 - 1"
+    c4 = "추 갤리온 14"
+    c5 = "추가 g -1"
+
+    rc1 = server._regex_voicech(c1)
+    assert rc1 is not None
+    assert rc1.group("name") == "슬루프"
+    assert rc1.group("num") == "213"
+    rc2 = server._regex_voicech(c2)
+    assert rc2 is not None
+    assert rc2.group("name") == "브리건틴"
+    assert rc2.group("num") == "2"
+    rc3 = server._regex_voicech(c3)
+    assert rc3 is not None
+    assert rc3.group("name") == "갤리온"
+    assert rc3.group("num") == "1"
+    assert server._regex_voicech(c4) is None
+    assert server._regex_voicech(c5) is None
+
+
+@pytest.mark.asyncio
+async def test_conv_Ship():
+    s = utils.converters.Ship()
+    assert {"name": "갤리온", "id": 0} == await s.convert(None, "GAlLeOn")
+    assert {"name": "브리건틴", "id": 1} == await s.convert(None, "브리간틴")
+    assert {"name": "슬루프", "id": 2} == await s.convert(None, "SLoOP")
+
+    with pytest.raises(commands.BadArgument):
+        await s.convert(None, "asdafe")
