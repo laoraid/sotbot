@@ -1,6 +1,8 @@
 import os
+import sys
 import shutil
 
+import discord
 from discord.ext import commands
 
 from .. import utils
@@ -24,7 +26,14 @@ class Manage(commands.Cog):
 
     @commands.command(hidden=True)
     async def update(self, ctx):
-        os.environ["BOT_GIT_PATH"]
+        await self.bot.change_presence(activity=discord.Game("봇 재시작"))
+        os.system("pip3 install -r requirements.txt")
+        gitpath = os.path.join(os.environ["BOT_GIT_PATH"], "sotbot")
+        botpath = os.path.join(os.environ["BOT_PATH"], "sotbot")
+        shutil.rmtree(botpath)
+        shutil.copytree(gitpath, botpath)
+        os.system("python3 -m src.main &")
+        sys.exit()
 
     @commands.command(hidden=True)
     @commands.is_owner()

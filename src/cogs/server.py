@@ -161,7 +161,7 @@ class Server(commands.Cog):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def 테스트2(self, ctx, arg):
-        await ctx.send(f"{arg} / 테스트 성공!3")
+        await ctx.send(f"{arg} / 테스트 성공!재시작")
 
 
 def setup(bot):
