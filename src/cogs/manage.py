@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from .. import utils
 from ..utils import cb
+from ..config import EXTENSIONS
 
 
 class Manage(commands.Cog):
@@ -22,6 +23,10 @@ class Manage(commands.Cog):
             await ctx.send(f'{cb(cmdname)} 명령어를 찾을 수 없습니다.')
 
     @commands.command(hidden=True)
+    async def update(self, ctx):
+        os.environ["BOT_GIT_PATH"]
+
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def load(self, ctx, *, m):
         self.bot.load_extension(m)
@@ -34,11 +39,21 @@ class Manage(commands.Cog):
     @commands.command(name="reload", hidden=True)
     @commands.is_owner()
     async def _reload(self, ctx, *, m):
+        self.replace_reload(m)
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def reloadall(self, ctx):
+        for ext in EXTENSIONS:
+            self.replace_reload(ext)
+
+    def replace_reload(self, m):
         self.bot.unload_extension(m)
         filepath = f"{m.replace('.', '/')}.py"
         filename = os.path.basename(filepath)
         change_file(filename, filepath)
         self.bot.load_extension(m)
+
 
 def change_file(filename, filepath):
     srcdir = os.environ["BOT_GIT_PATH"]
