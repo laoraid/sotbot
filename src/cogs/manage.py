@@ -28,8 +28,8 @@ class Manage(commands.Cog):
     async def update(self, ctx):
         await self.bot.change_presence(activity=discord.Game("봇 재시작"))
         os.system("pip3 install -r requirements.txt")
-        gitpath = os.path.join(os.environ["BOT_GIT_PATH"], "sotbot")
-        botpath = os.path.join(os.environ["BOT_PATH"], "sotbot")
+        gitpath = os.environ["BOT_GIT_PATH"]
+        botpath = os.environ["BOT_PATH"]
         shutil.rmtree(botpath)
         shutil.copytree(gitpath, botpath)
         os.system("python3 -m src.main &")
