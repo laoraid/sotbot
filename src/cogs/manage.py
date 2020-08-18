@@ -27,13 +27,7 @@ class Manage(commands.Cog):
     @commands.command(hidden=True)
     async def update(self, ctx):
         await self.bot.change_presence(activity=discord.Game("봇 재시작"))
-        os.system("pip3 install -r requirements.txt")
-        gitpath = os.environ["BOT_GIT_PATH"]
-        botpath = os.environ["BOT_PATH"]
-        shutil.rmtree(botpath)
-        shutil.copytree(gitpath, botpath)
-        os.system("python3 -m src.main &")
-        sys.exit()
+        os.system("sudo shutdown -r now")
 
     @commands.command(hidden=True)
     @commands.is_owner()
