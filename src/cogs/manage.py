@@ -1,5 +1,4 @@
 import os
-import sys
 import shutil
 
 import discord
@@ -26,7 +25,8 @@ class Manage(commands.Cog):
 
     @commands.command(hidden=True)
     async def update(self, ctx):
-        await self.bot.change_presence(activity=discord.Game("봇 재시작"))
+        await self.bot.change_presence(activity=discord.Game("봇 재시작"),
+                                       status=discord.Status.dnd)
         os.system("sudo shutdown -r now")
 
     @commands.command(hidden=True)
