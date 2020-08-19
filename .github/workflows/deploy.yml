@@ -5,7 +5,7 @@ name: Deploy
 
 on:
   push:
-    branches: [ gce-test ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
