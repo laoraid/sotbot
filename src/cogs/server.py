@@ -158,11 +158,6 @@ class Server(commands.Cog):
             if admin not in member.roles and not member.bot:
                 await member.add_roles(role)
 
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def 테스트2(self, ctx, arg):
-        await ctx.send(f"{arg} / 테스트 성공!재시작2")
-
 
 def setup(bot):
     bot.add_cog(Server(bot))
