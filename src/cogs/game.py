@@ -46,7 +46,7 @@ class Game(commands.Cog):
         self.db.connect()
 
     def cog_unload(self):
-        self.db.con.close()
+        self.db.close()
 
     @commands.command(aliases=['pos'], description="섬의 좌표와 위키 링크를 출력합니다.",
                       usage=mkhelpstr("좌표", "섬 이름", aliases=["pos"]))

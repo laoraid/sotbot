@@ -1,6 +1,8 @@
 import sqlite3
+import datetime
+import pickle
 
-from . import mkEmptyList
+from . import mkEmptyList, toKCT
 
 
 class DB(object):
@@ -15,6 +17,17 @@ class DB(object):
         self.cur.execute(query)
         return self.cur.fetchall()
 
+    def insert(self, table, fields, data):
+        fields = ",".join(fields)
+        data = ",".join(data)
+        query = f"insert into {table}({fields}) values ({data})"
+        self.cur.execute(query)
+        self.con.commit()
+
+    def select(self, field, table):
+        query = f"select {field} from {table}"
+        return self.query(query)
+
     def select_where(self, field, table, where):
         query = f"select {field} from {table} where {where}"
         return self.query(query)
@@ -22,11 +35,15 @@ class DB(object):
     def field(self, tablename, fname):
         return self.query(f"select {fname} from {tablename}")
 
+    def close(self):
+        self.cur.close()
+        self.con.close()
+
     def __enter__(self):
         self.connect()
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.con.close()
+        self.close()
 
     def makedict(self, names, data):
         d = {}
@@ -83,3 +100,35 @@ class IslandDB(DB):
         for i, data in enumerate(raw):
             arr[i] = self._dictall(data)
         return arr
+
+
+class Drops(object):
+    def __init__(self, reward, imageurl, due):
+        self.reward = reward
+        self.imageurl = imageurl
+        self.due = due
+
+
+class TwitchDropsDB(DB):
+    def __init__(self):
+        super(TwitchDropsDB, self).__init__("src/twitch_drops.db")
+
+    def insert(self, title, drops):
+        dt = datetime.datetime.utcnow()
+        dropsdata = pickle.dumps(drops)
+        dropsdata = sqlite3.Binary(dropsdata)
+
+        self.cur.execute("insert into drops(dropsdata, title, lastcheck) values (?,?,?)",
+                         (dropsdata, title, dt))
+        self.con.commit()
+
+    @property
+    def last(self):
+        q = f"select lastcheck, dropsdata from drops order by lastcheck desc"
+        data = self.query(q)[0]
+
+        dt = datetime.datetime.strptime(data[0], "%Y-%m-%d %H:%M:%S.%f")
+        dt = toKCT(dt)
+
+        data = pickle.loads(data[1])
+        return (dt, data)
