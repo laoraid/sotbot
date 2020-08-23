@@ -44,7 +44,7 @@ def chk_pos_embed(embed, island, pos, animal, region):
 async def test_animal():
     callback = getattr(g.동물, "callback")
 
-    await callback(g, ctx=ctx, p="Q17", n=[3])
+    await callback(g, ctx=ctx, p="Q17", n=["chicken"])
 
     embed = ctx.lastembed
     island = "따개비 케이"

@@ -64,21 +64,21 @@ async def test_converter_animal():
     a = utils.converters.Animal()
 
     ck = await a.convert(None, "chickEn")
-    assert 3 == ck
+    assert "chicken" == ck
     assert "닭" == utils.converters.decode_animal(ck)
 
-    assert 3 == await a.convert(None, "닭")
+    assert "chicken" == await a.convert(None, "chicken")
 
     sn = await a.convert(None, "snAke")
-    assert 5 == sn
+    assert "snake" == sn
     assert "뱀" == utils.converters.decode_animal(sn)
 
     pig = await a.convert(None, "돼지")
-    assert 4 == pig
+    assert "pig" == pig
     assert "돼지" == utils.converters.decode_animal(pig)
 
-    assert 5 == await a.convert(None, "스네이크")
-    assert 5 == await a.convert(None, "뱀")
+    assert "snake" == await a.convert(None, "스네이크")
+    assert "snake" == await a.convert(None, "뱀")
 
     with pytest.raises(commands.BadArgument):
         await a.convert(None, "asdafe")
@@ -87,9 +87,10 @@ async def test_converter_animal():
 
 
 def test_conv_animal_str():
-    assert "닭,돼지,뱀" == utils.converters.convert_animal([True] * 6)
-    assert "닭,뱀" == utils.converters.convert_animal(
-        [0, 0, 0, True, False, True])
+    c1 = {"chicken": 1, "pig": 1, "snake": 1}
+    assert "닭,돼지,뱀" == utils.converters.convert_animal(c1)
+    c1["pig"] = 0
+    assert "닭,뱀" == utils.converters.convert_animal(c1)
 
 
 @pytest.mark.asyncio

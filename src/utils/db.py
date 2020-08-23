@@ -8,8 +8,8 @@ class DB(object):
         self.filename = filename
 
     def connect(self):
-        self.connenct = sqlite3.connect(self.filename)
-        self.cur = self.connenct.cursor()
+        self.con = sqlite3.connect(self.filename)
+        self.cur = self.con.cursor()
 
     def query(self, query):
         self.cur.execute(query)
@@ -26,7 +26,7 @@ class DB(object):
         self.connect()
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.connenct.close()
+        self.con.close()
 
     def makedict(self, names, data):
         d = {}
@@ -39,7 +39,7 @@ class DB(object):
 
 class IslandDB(DB):
     def __init__(self):
-        super(IslandDB, self).__init__("src/data/old/island.db")
+        super(IslandDB, self).__init__("src/data/island.db")
 
     def _dict(self, *, krname=None, pos=None, engname=None,
               region=None, ch=None, pig=None, snake=None):
@@ -62,6 +62,7 @@ class IslandDB(DB):
         return self.makedict(names, data)
 
     def get_data_by_name(self, lang, name):
+        name = name.replace("'", "''")
         if lang.lower() == "kr":
             where = f"KRname='{name}'"
         elif lang.lower() == "eng":

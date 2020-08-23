@@ -3,34 +3,30 @@ import tossi
 
 from discord.ext import commands
 
-CHICKEN = 3
-PIG = 4
-SNAKE = 5
-
 
 class Animal(commands.Converter):
     async def convert(self, ctx, arg):
         arg = arg.lower()
         if arg in ["닭", "치킨", "chicken"]:
-            return CHICKEN
+            return "chicken"
         elif arg in ["돼지", "pig", "피그"]:
-            return PIG
+            return "pig"
         elif arg in ["뱀", "snake", "스네이크"]:
-            return SNAKE
+            return "snake"
         un = tossi.postfix(arg, "은")
         raise commands.BadArgument(f"{un} 동물 종류가 아닙니다.", arg)
 
 
-def convert_animal(infoarr):
+def convert_animal(data):
     c = ""
     p = ""
     s = ""
 
-    if infoarr[CHICKEN]:
+    if data["chicken"] == 1:
         c = "닭"
-    if infoarr[PIG]:
+    if data["pig"] == 1:
         p = "돼지"
-    if infoarr[SNAKE]:
+    if data["snake"] == 1:
         s = "뱀"
 
     if c == "" and p == "" and s == "":
@@ -43,11 +39,11 @@ def convert_animal(infoarr):
 
 
 def decode_animal(a):
-    if a == CHICKEN:
+    if a == "chicken":
         return "닭"
-    elif a == SNAKE:
+    elif a == "snake":
         return "뱀"
-    elif a == PIG:
+    elif a == "pig":
         return "돼지"
     raise ValueError
 

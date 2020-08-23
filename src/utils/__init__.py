@@ -92,12 +92,9 @@ def memoize(pro=None):
 
 @memoize("name")
 def make_cmd_help_embed(cmd: commands.Command):
-    embed = discord.Embed(title=f"{cmd.name} 명령어", color=0xeec42b)
-
-    embed.add_field(name="설명", value=LONG_DESCRIPTIONS[cmd.name], inline=False)
-    embed.add_field(name="사용법", value=cmd.usage)
-
-    return embed
+    return mk_embed(f"{cmd.name} 명령어",
+                    Field("설명", LONG_DESCRIPTIONS[cmd.name], False),
+                    Field("사용법", cmd.usage), color=0xeec42b)
 
 
 def initbot(bot):
@@ -113,3 +110,28 @@ def get_traceback(error):
 
 def cb(string):
     return f"`{string}`"
+
+
+class Field(object):
+    def __init__(self, name, value, inline=True):
+        self.name = name
+        self.value = value
+        self.inline = inline
+
+
+def mk_embed(title, *fields, titleurl=None, color=None, footer=None):
+    if color is None:
+        color = randcolor()
+
+    if titleurl is not None:
+        embed = discord.Embed(title=title, url=titleurl, color=color)
+    else:
+        embed = discord.Embed(title=title, color=color)
+
+    for f in fields:
+        embed.add_field(name=f.name, value=f.value, inline=f.inline)
+
+    if footer is not None:
+        embed.set_footer(text=footer)
+
+    return embed
