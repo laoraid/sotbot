@@ -133,3 +133,4 @@ bottoken.py
 .vscode/
 simpletests.py
 check.bat
+*.db

@@ -5,8 +5,7 @@ import re
 from discord.ext import commands, tasks
 import wikitextparser
 
-from ..utils import db, mk_embed, toKCT, Field
-from ..utils import Log
+from ..utils import db, mk_embed, toKCT, Field, Log, mkhelpstr
 from .. import utils
 from ..config import OWNER_ID
 
@@ -22,7 +21,8 @@ class Events(commands.Cog):
     def unload_cog(self):
         self.db.close()
 
-    @commands.command(hidden=True)
+    @commands.command(description="트위치 드롭스 정보를 불러옵니다.",
+                      usage=mkhelpstr("드롭스"))
     async def 드롭스(self, ctx):
         TITLE = "https://seaofthieves.gamepedia.com/Twitch_Drops"
         data = self.db.last
@@ -44,7 +44,7 @@ class Events(commands.Cog):
                          titleurl=TITLE, color=0x9246ff, footer=footer)
         await ctx.send(embed=embed)
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=3)
     async def twitch_drops_loop(self):
         DROPSURL = "https://seaofthieves.gamepedia.com/Twitch_Drops?action=raw"
         async with aiohttp.ClientSession() as session:
