@@ -24,6 +24,10 @@ class DB(object):
         self.cur.execute(query)
         self.con.commit()
 
+    def update(self, table, field, data):
+        query = f"update {table} set {field}=('{data}')"
+        self.query(query)
+
     def select(self, field, table):
         query = f"select {field} from {table}"
         return self.query(query)
@@ -103,32 +107,38 @@ class IslandDB(DB):
 
 
 class Drops(object):
-    def __init__(self, reward, imageurl, due):
+    def __init__(self, reward, startdate, enddate):
         self.reward = reward
-        self.imageurl = imageurl
-        self.due = due
+        # self.imageurl = imageurl
+        self.startdate = startdate
+        self.enddate = enddate
 
 
 class TwitchDropsDB(DB):
     def __init__(self):
-        super(TwitchDropsDB, self).__init__("src/twitch_drops.db")
+        super(TwitchDropsDB, self).__init__("src/data/twitch_drops.db")
 
     def insert(self, title, drops):
         dt = datetime.datetime.utcnow()
         dropsdata = pickle.dumps(drops)
         dropsdata = sqlite3.Binary(dropsdata)
 
-        self.cur.execute("insert into drops(dropsdata, title, lastcheck) values (?,?,?)",
+        self.cur.execute(("insert into drops(dropsdata, title, lastcheck)"
+                          " values (?,?,?)"),
                          (dropsdata, title, dt))
         self.con.commit()
 
+    def updatedate(self, dt):
+        self.update("drops", "lastcheck", dt)
+
     @property
     def last(self):
-        q = f"select lastcheck, dropsdata from drops order by lastcheck desc"
+        q = ("select lastcheck, dropsdata, title from drops"
+             " order by lastcheck desc")
         data = self.query(q)[0]
 
         dt = datetime.datetime.strptime(data[0], "%Y-%m-%d %H:%M:%S.%f")
         dt = toKCT(dt)
 
-        data = pickle.loads(data[1])
-        return (dt, data)
+        drops = pickle.loads(data[1])
+        return (dt, drops, data[2])

@@ -1,6 +1,7 @@
 import os
 
-EXTENSIONS = ["src.cogs.game", "src.cogs.manage", "src.cogs.server"]
+EXTENSIONS = ["src.cogs.game", "src.cogs.manage",
+              "src.cogs.server", "src.cogs.events"]
 OWNER_ID = 226700060308668420
 CMD_PREFIX = "!"
 
