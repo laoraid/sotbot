@@ -18,7 +18,7 @@ class Events(commands.Cog):
         self.db.connect()
         self.twitch_drops_loop.start()
 
-    def unload_cog(self):
+    def cog_unload(self):
         self.db.close()
 
     @commands.command(description="트위치 드롭스 정보를 불러옵니다.",
