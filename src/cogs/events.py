@@ -44,7 +44,7 @@ class Events(commands.Cog):
                          titleurl=TITLE, color=0x9246ff, footer=footer)
         await ctx.send(embed=embed)
 
-    @tasks.loop(hours=3)
+    @tasks.loop(hours=2)
     async def twitch_drops_loop(self):
         DROPSURL = "https://seaofthieves.gamepedia.com/Twitch_Drops?action=raw"
         async with aiohttp.ClientSession() as session:
