@@ -135,7 +135,12 @@ class TwitchDropsDB(DB):
     def last(self):
         q = ("select lastcheck, dropsdata, title from drops"
              " order by lastcheck desc")
-        data = self.query(q)[0]
+        data = self.query(q)
+
+        if len(data) == 0:
+            return None
+
+        data = data[0]
 
         dt = datetime.datetime.strptime(data[0], "%Y-%m-%d %H:%M:%S.%f")
         dt = toKCT(dt)
