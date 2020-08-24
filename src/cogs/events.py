@@ -35,7 +35,7 @@ class Events(commands.Cog):
             startstr = f"{start.month}월 {start.day}일 {start.hour}시"
             endstr = f"{end.month}월 {end.day}일 {end.hour}시"
             embedfields.append(
-                Field(f"{drop.reward}", f"{startstr} ~ {endstr}"))
+                Field(f"{drop.reward}", f"{startstr} ~ {endstr}", False))
 
         footer = data[0].strftime("%Y-%m-%d %H:%M:%S")
         footer = f"확인 시간 : {footer}"
