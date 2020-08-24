@@ -57,7 +57,8 @@ class Events(commands.Cog):
                 parsed = wikitextparser.parse(text)
                 fsec = parsed.sections[1]
                 title = fsec.title.strip()
-                if title == self.db.last[2]:
+                last = self.db.last
+                if last is not None and title == self.db.last[2]:
                     self.db.updatedate(datetime.datetime.utcnow())
                     return
                 table = fsec.tables[0]
@@ -98,6 +99,10 @@ class Events(commands.Cog):
         trace = utils.get_traceback(error)
         print(trace)
         await self.bot.get_user(OWNER_ID).send(f"드롭스 에러\n{trace}")
+
+    @twitch_drops_loop.before_loop
+    async def before_twitch_drops(self):
+        await self.bot.wait_until_ready()
 
 
 def setup(bot):
