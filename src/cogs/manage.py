@@ -50,6 +50,7 @@ class Manage(commands.Cog):
     @commands.after_invoke(update_after)
     async def load(self, ctx, *, m):
         self.bot.load_extension(m)
+        await ctx.send(f"{m} 로드됨")
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -57,13 +58,14 @@ class Manage(commands.Cog):
     @commands.after_invoke(update_after)
     async def unload(self, ctx, *, m):
         self.bot.unload_extension(m)
+        await ctx.send(f"{m} 언로드됨")
 
     @commands.command(name="reload", hidden=True)
     @commands.is_owner()
     @commands.before_invoke(update_before("파일 교체"))
     @commands.after_invoke(update_after)
     async def _reload(self, ctx, *, m):
-        self.replace_reload(m)
+        self.unload_load(m)
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -71,13 +73,10 @@ class Manage(commands.Cog):
     @commands.after_invoke(update_after)
     async def reloadall(self, ctx):
         for ext in EXTENSIONS:
-            self.replace_reload(ext)
+            self.unload_load(ext)
 
-    def replace_reload(self, m):
+    def unload_load(self, m):
         self.bot.unload_extension(m)
-        filepath = f"{m.replace('.', '/')}.py"
-        filename = os.path.basename(filepath)
-        change_file(filename, filepath)
         self.bot.load_extension(m)
 
 
