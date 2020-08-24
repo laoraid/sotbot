@@ -6,6 +6,9 @@ from discord.ext import commands, tasks
 import wikitextparser
 
 from ..utils import db, mk_embed, toKCT, Field
+from ..utils import Log
+from .. import utils
+from ..config import OWNER_ID
 
 
 class Events(commands.Cog):
@@ -88,6 +91,13 @@ class Events(commands.Cog):
                     dropslist.append(db.Drops(reward, startdate, enddate))
 
         self.db.insert(title, dropslist)
+
+    @twitch_drops_loop.error
+    async def twitch_drops_error(self, error):
+        Log.e(error=error)
+        trace = utils.get_traceback(error)
+        print(trace)
+        await self.bot.get_user(OWNER_ID).send(f"드롭스 에러\n{trace}")
 
 
 def setup(bot):
