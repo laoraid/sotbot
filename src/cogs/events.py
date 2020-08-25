@@ -60,6 +60,7 @@ class Events(commands.Cog):
                 last = self.db.last
                 if last is not None and title == self.db.last[2]:
                     self.db.updatedate(datetime.datetime.utcnow())
+                    Log.v(v="드롭스 변경 없음")
                     return
                 table = fsec.tables[0]
                 td = table.data()
@@ -92,6 +93,7 @@ class Events(commands.Cog):
                     dropslist.append(db.Drops(reward, startdate, enddate))
 
         self.db.insert(title, dropslist)
+        Log.v(v="드롭스 불러옴")
 
     @twitch_drops_loop.error
     async def twitch_drops_error(self, error):
