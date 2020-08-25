@@ -1,12 +1,22 @@
 import datetime
+import logging
+import logging.handlers
 
 from . import toKCT, dt_to_str
+
+logger = logging.getLogger("bot")
+logger.setLevel(logging.DEBUG)
+
+logger.addHandler(logging.StreamHandler())
+maxbyte = 1024 * 1024 * 10
+logger.addHandler(logging.handlers.RotatingFileHandler(
+    "bot.log", maxBytes=maxbyte, backupCount=10))
 
 
 def i(ctx):
     time = toKCT(ctx.message.created_at)
     ca = dt_to_str(time, True)
-    print(f"[info/{ca}] {ctx.author} | {ctx.message.content}")
+    logger.info(f"[info/{ca}] {ctx.author} | {ctx.message.content}")
 
 
 def e(ctx=None, *, error):
@@ -16,7 +26,7 @@ def e(ctx=None, *, error):
         content = error
     else:
         content = f"{ctx.message.content} | {error}"
-    print(f"[error/{now}] | {content}")
+    logger.error(f"[error/{now}] | {content}")
 
 
 def v(ctx=None, v=None):
@@ -29,4 +39,4 @@ def v(ctx=None, v=None):
 
     ca = dt_to_str(time, True)
 
-    print(f"[Verbose/{ca}] {content} | {v}")
+    logger.debug(f"[Verbose/{ca}] {content} | {v}")
