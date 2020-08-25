@@ -21,6 +21,16 @@ if __name__ == "__main__":
         await bot.process_commands(msg)
 
     @bot.event
+    async def on_guild_join(guild):
+        await bot.get_user(bot.owner_id).send("길드 조인됨"
+                                              f" 이름 : {guild.name}"
+                                              f" 오너 : {str(guild.owner)}")
+        await guild.owner.send("안녕하세요. SoTbot 제작자입니다."
+                               " 해당 봇은 특정 디스코드 서버 이외에는 사용할 수 없도록 설정되어 있습니다."
+                               " 만약 임의로 봇을 추가하셨다면, 추방해 주세요."
+                               " 소스코드는 디스코드 Laoraid#9731로 문의 바랍니다.")
+
+    @bot.event
     async def on_ready():
         await bot.change_presence(
             activity=discord.Game(name=f'{CMD_PREFIX}help'))

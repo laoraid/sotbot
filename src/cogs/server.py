@@ -12,6 +12,8 @@ from ..utils import mkhelpstr, Log, cb
 
 
 def _get_cats_by_guildID(guildid, add=False):
+    if guildid not in CATEGORIES:
+        return None
     if not add:
         return CATEGORIES[guildid]
     return ADD_CATEGORIES[guildid]
@@ -57,6 +59,11 @@ class Server(commands.Cog):
     async def clearchannel(self):
         for guild in self.bot.guilds:
             cats = _get_cats_by_guildID(guild.id, add=True)
+
+            if cats is None:
+                Log.e(error=f"알 수 없는 길드 아이디 : {guild.id}")
+                return
+
             for catid in cats:
                 cat = discord.utils.get(guild.categories, id=catid)
                 vcs = cat.voice_channels
