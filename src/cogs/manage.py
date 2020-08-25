@@ -18,6 +18,7 @@ def update_before(activity):
 
 async def update_after(cog, ctx):
     await ctx.bot.change_presence(activity=discord.Game(f'{CMD_PREFIX}help'))
+    utils.make_help_embed(ctx.bot)
 
 
 class Manage(commands.Cog):
@@ -66,6 +67,7 @@ class Manage(commands.Cog):
     @commands.after_invoke(update_after)
     async def _reload(self, ctx, *, m):
         self.unload_load(m)
+        await ctx.send(f"{m} 리로드됨")
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -74,6 +76,7 @@ class Manage(commands.Cog):
     async def reloadall(self, ctx):
         for ext in EXTENSIONS:
             self.unload_load(ext)
+            await ctx.send(f"{ext} 리로드됨")
 
     def unload_load(self, m):
         self.bot.unload_extension(m)
