@@ -9,8 +9,8 @@ from src.cogs import server
 
 
 def test_mkhelpstr():
-    c1 = f"``{CMD_PREFIX}테스트1``"
-    c2 = f"``{CMD_PREFIX}테스트2`` ``인자1`` ``인자2``"
+    c1 = f"`{CMD_PREFIX}테스트1`"
+    c2 = f"`{CMD_PREFIX}테스트2` `인자1` `인자2`"
 
     assert c1 == utils.mkhelpstr("테스트1")
     assert c2 == utils.mkhelpstr("테스트2", "인자1", "인자2")

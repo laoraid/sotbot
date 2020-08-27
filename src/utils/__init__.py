@@ -1,5 +1,4 @@
 import pytz
-from functools import wraps
 import random
 import traceback
 
@@ -30,13 +29,13 @@ def mkhelpstr(cmd, *args, aliases=None):
     helpstr = mkEmptyList(len(aliases))
 
     if len(args) != 0:
-        args = "`` ``".join(args)
-        args = f" ``{args}``"
+        args = "` `".join(args)
+        args = f" `{args}`"
     else:
         args = ""
 
     for i, name in enumerate(aliases):
-        helpstr[i] = f"``{CMD_PREFIX}{name}``{args}"
+        helpstr[i] = f"`{CMD_PREFIX}{name}`{args}"
 
     return " 또는 ".join(helpstr)
 
@@ -71,26 +70,6 @@ def make_help_embed(bot):
     helpembed.set_footer(text=f"'{CMD_PREFIX}help 명령어' 입력시 개별 명령어 도움말 출력")
 
 
-def memoize(pro=None):
-    def inner(func):
-        cache = {}
-
-        @wraps(func)
-        def ininner(arg):
-            if pro is None:
-                p = arg
-            else:
-                p = getattr(arg, pro)
-            if p not in cache:
-                cache[p] = func(arg)
-            return cache[p]
-
-        return ininner
-
-    return inner
-
-
-@memoize("name")
 def make_cmd_help_embed(cmd: commands.Command):
     return mk_embed(f"{cmd.name} 명령어",
                     Field("설명", LONG_DESCRIPTIONS[cmd.name], False),
