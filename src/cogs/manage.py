@@ -60,7 +60,7 @@ class Manage(commands.Cog):
     @owner_command
     @commands.before_invoke(update_before("봇 재시작"))
     async def update(self, ctx):
-        log=[]
+        log = []
         for ext in EXTENSIONS:
             log.append(await self.unload_ext(ctx, ext, True))
         await ctx.send("\n".join(log))
