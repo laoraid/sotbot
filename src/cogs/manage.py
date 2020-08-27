@@ -41,22 +41,29 @@ class Manage(commands.Cog):
         else:
             await ctx.send(f'{cb(cmdname)} 명령어를 찾을 수 없습니다.')
 
-    async def unload_ext(self, ctx, m):
+    async def unload_ext(self, ctx, m, notsay=False):
         self.bot.unload_extension(m)
+        log = f"{m} 언로드됨"
         Log.v(ctx, f"{m} 언로드됨")
-        await ctx.send(f"{m} 언로드됨")
+        if notsay:
+            return log
+        await ctx.send(log)
 
-    async def load_ext(self, ctx, m):
+    async def load_ext(self, ctx, m, notsay=False):
         self.bot.load_extension(m)
+        log = f"{m} 로드됨"
         Log.v(ctx, f"{m} 로드됨")
-        await ctx.send(f"{m} 로드됨")
+        if notsay:
+            return log
+        await ctx.send(log)
 
     @owner_command
     @commands.before_invoke(update_before("봇 재시작"))
     async def update(self, ctx):
+        log=[]
         for ext in EXTENSIONS:
-            await self.unload_ext(ctx, ext)
-
+            log.append(await self.unload_ext(ctx, ext, True))
+        await ctx.send("\n".join(log))
         await self.bot.logout()
         os.execl(sys.executable, sys.executable, "-m", "src.main")
 
@@ -75,7 +82,7 @@ class Manage(commands.Cog):
     @owner_command
     @commands.before_invoke(update_before("파일 교체"))
     @commands.after_invoke(update_after)
-    async def _reload(self, ctx, *, m):
+    async def reload(self, ctx, *, m):
         await self.unload_ext(ctx, tocog(m))
         await self.load_ext(ctx, tocog(m))
 
@@ -83,9 +90,11 @@ class Manage(commands.Cog):
     @commands.before_invoke(update_before("파일 교체"))
     @commands.after_invoke(update_after)
     async def reloadall(self, ctx):
+        log = [None, None]
         for ext in EXTENSIONS:
-            await self.unload_ext(ctx, ext)
-            await self.load_ext(ctx, ext)
+            log[0] = await self.unload_ext(ctx, ext, True)
+            log[1] = await self.load_ext(ctx, ext, True)
+            await ctx.send("\n".join(log))
 
     @owner_command
     async def 길드(self, ctx):
