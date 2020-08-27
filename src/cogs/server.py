@@ -8,7 +8,7 @@ import tossi
 from ..utils.converters import Ship
 from ..config import CATEGORIES, OWNER_ID, ADD_CATEGORIES
 from .. import utils
-from ..utils import mkhelpstr, Log, cb
+from ..utils import mkhelpstr, Log, cb, normal_command
 
 
 def _get_cats_by_guildID(guildid, add=False):
@@ -85,8 +85,7 @@ class Server(commands.Cog):
         print(trace)
         await self.bot.get_user(OWNER_ID).send(f"채널 청소 에러\n{trace}")
 
-    @commands.command(description="배 종류 별로 보이스 채널을 만듭니다.",
-                      usage=mkhelpstr("출항", "배 종류"))
+    @normal_command("출항", "배 종류")
     @commands.cooldown(1, 5, type=commands.BucketType.user)
     async def 출항(self, ctx, ship: Ship):
         author = ctx.message.author
@@ -136,8 +135,7 @@ class Server(commands.Cog):
                            f" 채널 생성 즉시 채널이 사라질 수도 있어요."
                            f" {name} 입장하세요.")
 
-    @commands.command(description="xbox 아이디가 포함되게 닉네임을 변경합니다.",
-                      usage=mkhelpstr("아이디", "xboxid"))
+    @normal_command("아이디", "xboxid")
     async def 아이디(self, ctx, *, id):
         prevnick = ctx.author.display_name
 

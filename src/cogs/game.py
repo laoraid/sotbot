@@ -8,10 +8,10 @@ from discord.ext import commands
 from bs4 import BeautifulSoup
 import tossi
 
-from ..utils import dt_to_str, mkhelpstr, converters, Log, cb, Field
-from ..utils.converters import convert_animal
 from .. import utils
-from ..utils import db
+from ..utils import dt_to_str, cb, Field, normal_command
+from ..utils import db, converters, Log
+from ..utils.converters import convert_animal
 from ..config import CMD_PREFIX
 
 RELOAD_TIME = datetime.timedelta(minutes=3)
@@ -48,8 +48,7 @@ class Game(commands.Cog):
     def cog_unload(self):
         self.db.close()
 
-    @commands.command(aliases=['pos'], description="섬의 좌표와 위키 링크를 출력합니다.",
-                      usage=mkhelpstr("좌표", "섬 이름", aliases=["pos"]))
+    @normal_command("좌표", "섬 이름", aliases=["pos"])
     async def 좌표(self, ctx, *, island):
         origin = island
         island = island.lower()
@@ -97,8 +96,7 @@ class Game(commands.Cog):
                                footer="섬 이름 클릭시 위키로 이동됨")
         return embed
 
-    @commands.command(aliases=["server"], description="서버 상태를 확인합니다. 쿨타임 3분",
-                      usage=mkhelpstr("서버", aliases=["server"]))
+    @normal_command("서버", aliases=["server"])
     async def 서버(self, ctx):
         STATURL = "https://www.seaofthieves.com/ko/status"
         SERVER_IS_SICK = ":regional_indicator_x: 점검중이거나 서버가 터졌어요."
@@ -178,8 +176,7 @@ class Game(commands.Cog):
 
         return islandtemp
 
-    @commands.command(description="현재 좌표에서 가장 가까운 동물이 있는 섬을 찾습니다.",
-                      usage=mkhelpstr("동물", "현재 좌표", "동물1", "동물2..."))
+    @normal_command("동물", "현재 좌표", "동물1", "동물2...")
     async def 동물(self, ctx, p: converters.Position,
                  n: commands.Greedy[converters.Animal]):
         if len(n) == 0:

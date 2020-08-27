@@ -5,8 +5,9 @@ import re
 from discord.ext import commands, tasks
 import wikitextparser
 
-from ..utils import db, mk_embed, toKCT, Field, Log, mkhelpstr
 from .. import utils
+from ..utils import db, Log
+from ..utils import mk_embed, toKCT, Field, normal_command
 from ..config import OWNER_ID
 
 
@@ -21,8 +22,7 @@ class Events(commands.Cog):
     def cog_unload(self):
         self.db.close()
 
-    @commands.command(description="트위치 드롭스 정보를 불러옵니다.",
-                      usage=mkhelpstr("드롭스"))
+    @normal_command("드롭스")
     async def 드롭스(self, ctx):
         TITLE = "https://seaofthieves.gamepedia.com/Twitch_Drops"
         data = self.db.last

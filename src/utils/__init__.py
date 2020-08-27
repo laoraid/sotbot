@@ -17,6 +17,31 @@ def toKCT(date):
     return date.astimezone(KCT)
 
 
+def owner_command(func):
+    return commands.command(hidden=True)(commands.is_owner()(func))
+
+
+def normal_command(name, *args, aliases=None):
+    des = short_des(name)
+    usage = mkhelpstr(name, *args, aliases=aliases)
+    if aliases is not None:
+        cmd = commands.command(name, aliases=aliases,
+                               description=des, usage=usage)
+    else:
+        cmd = commands.command(name, description=des, usage=usage)
+
+    def inner(func):
+        return cmd(func)
+    return inner
+
+
+def short_des(cmd):
+    if isinstance(cmd, commands.Command):
+        cmd = cmd.name
+    ldes = LONG_DESCRIPTIONS[cmd]
+    return ldes.split("\n")[0]
+
+
 def mkEmptyList(buffer):
     return [None] * buffer
 
