@@ -25,7 +25,8 @@ class DB(object):
         self.con.commit()
 
     def update(self, table, field, data, where, wheredata):
-        query = f"update {table} set {field}=('{data}') where {where} = '{wheredata}'"
+        query = (f"update {table} set {field}=('{data}') "
+                 f"where {where} = '{wheredata}'")
         self.query(query)
 
     def select(self, field, table):

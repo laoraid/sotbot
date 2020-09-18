@@ -80,8 +80,6 @@ async def test_converter_animal():
     assert "snake" == await a.convert(None, "스네이크")
     assert "snake" == await a.convert(None, "뱀")
 
-    with pytest.raises(commands.BadArgument):
-        await a.convert(None, "asdafe")
     with pytest.raises(ValueError):
         utils.converters.decode_animal(0)
 
@@ -100,11 +98,6 @@ async def test_converter_pos():
     assert "A03" == await p.convert(None, "a-03")
     assert "P19" == await p.convert(None, "P19")
     assert "Z21" == await p.convert(None, "z21")
-
-    with pytest.raises(commands.BadArgument):
-        await p.convert(None, "www1")
-        await p.convert(None, "A-29")
-        await p.convert(None, "q39")
 
 
 def test_regex_voicech():
