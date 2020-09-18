@@ -14,6 +14,8 @@ UTC = pytz.utc
 def toKCT(date):
     if date.tzinfo is None:
         date = UTC.localize(date)
+    elif date.tzinfo == KCT:
+        return date
     return date.astimezone(KCT)
 
 
@@ -79,6 +81,10 @@ def randcolor():
 helpembed = discord.Embed(title="명령어 리스트", color=0x2ba3ee)
 viscomsdict = {}
 viscoms = []
+
+
+def str_help_by_cmd(cmdname):
+    return f"도움말 : `{CMD_PREFIX}help` `{cmdname}`"
 
 
 def make_help_embed(bot):

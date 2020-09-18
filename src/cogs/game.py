@@ -9,10 +9,9 @@ from bs4 import BeautifulSoup
 import tossi
 
 from .. import utils
-from ..utils import dt_to_str, cb, Field, normal_command
+from ..utils import dt_to_str, cb, Field, normal_command, str_help_by_cmd
 from ..utils import db, converters, Log
 from ..utils.converters import convert_animal
-from ..config import CMD_PREFIX
 
 RELOAD_TIME = datetime.timedelta(minutes=3)
 
@@ -181,13 +180,13 @@ class Game(commands.Cog):
                  n: commands.Greedy[converters.Animal]):
         if len(n) == 0:
             raise commands.BadArgument(
-                f"동물 이름을 알 수 없습니다.\nEX) {CMD_PREFIX}동물 E21 닭 돼지")
+                f"동물 이름을 알 수 없습니다. {str_help_by_cmd('동물')}")
 
         n = set(n)
         closeisland = self._close_island(p, n)
 
         if closeisland is None:
-            await ctx.send("조건에 맞는 섬을 찾을 수 없습니다.")
+            await ctx.send(f"조건에 맞는 섬을 찾을 수 없습니다. {str_help_by_cmd('동물')}")
             Log.v(ctx, "조건에 맞는 섬 검색 실패")
             return None
 

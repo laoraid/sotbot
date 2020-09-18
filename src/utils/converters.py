@@ -3,6 +3,8 @@ import tossi
 
 from discord.ext import commands
 
+from ..utils import str_help_by_cmd
+
 
 class Animal(commands.Converter):
     async def convert(self, ctx, arg):
@@ -14,7 +16,9 @@ class Animal(commands.Converter):
         elif arg in ["뱀", "snake", "스네이크"]:
             return "snake"
         un = tossi.postfix(arg, "은")
-        raise commands.BadArgument(f"{un} 동물 종류가 아닙니다.", arg)
+        cmdname = ctx.command
+        helpstr = str_help_by_cmd(cmdname)
+        raise commands.BadArgument(f"{un} 동물 종류가 아닙니다. {helpstr}", arg)
 
 
 def convert_animal(data):
@@ -58,7 +62,9 @@ class Position(commands.Converter):
 
         if not ispos:
             un = tossi.postfix(arg, "은")
-            raise commands.BadArgument(f"{un} 좌표가 아닙니다.", arg)
+            cmdname = ctx.command
+            helpstr = str_help_by_cmd(cmdname)
+            raise commands.BadArgument(f"{un} 좌표가 아닙니다. {helpstr}", arg)
 
         return pos
 

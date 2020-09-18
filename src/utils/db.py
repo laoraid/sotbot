@@ -24,8 +24,8 @@ class DB(object):
         self.cur.execute(query)
         self.con.commit()
 
-    def update(self, table, field, data):
-        query = f"update {table} set {field}=('{data}')"
+    def update(self, table, field, data, where, wheredata):
+        query = f"update {table} set {field}=('{data}') where {where} = '{wheredata}'"
         self.query(query)
 
     def select(self, field, table):
@@ -129,7 +129,7 @@ class TwitchDropsDB(DB):
         self.con.commit()
 
     def updatedate(self, dt):
-        self.update("drops", "lastcheck", dt)
+        self.update("drops", "lastcheck", dt, "title", self.last[2])
 
     @property
     def last(self):

@@ -6,8 +6,8 @@ from discord.ext import commands, tasks
 import wikitextparser
 
 from .. import utils
-from ..utils import db, Log
-from ..utils import mk_embed, toKCT, Field, normal_command
+from ..utils import db, Log, KCT
+from ..utils import mk_embed, toKCT, Field, normal_command, owner_command
 from ..config import OWNER_ID
 
 
@@ -38,11 +38,20 @@ class Events(commands.Cog):
                 Field(f"{drop.reward}", f"{startstr} ~ {endstr}", False))
 
         footer = data[0].strftime("%Y-%m-%d %H:%M:%S")
-        footer = f"확인 시간 : {footer}"
+        footer = f"확인 시간 : {footer} / 데이터는 정확하지 않을 수 있습니다."
 
         embed = mk_embed(data[2], *embedfields,
                          titleurl=TITLE, color=0x9246ff, footer=footer)
         await ctx.send(embed=embed)
+
+    @owner_command
+    async def insertdrops(self, ctx, title, reward, startdate, enddate):
+        startdate = datetime.datetime.strptime(startdate, "%Y-%m-%d %H")
+        enddate = datetime.datetime.strptime(enddate, "%Y-%m-%d %H")
+        startdate = KCT.localize(startdate)
+        enddate = KCT.localize(enddate)
+        dl = [db.Drops(reward, startdate, enddate)]
+        self.db.insert(title, dl)
 
     @tasks.loop(hours=2)
     async def twitch_drops_loop(self):
