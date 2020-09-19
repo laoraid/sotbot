@@ -148,6 +148,10 @@ class Server(commands.Cog):
         else:
             nick = f'{prevnick}({id})'
 
+        if len(nick) > 32:
+            await ctx.send(f"{ctx.author.mention} 닉네임이 너무 깁니다.")
+            return
+
         await ctx.author.edit(nick=nick)
         await ctx.send(f'{prevnick}의 닉네임이 {nick}으로 변경되었습니다.')
 

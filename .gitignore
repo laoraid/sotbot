@@ -134,3 +134,4 @@ bottoken.py
 simpletests.py
 check.bat
 *.db
+src/data/twitch_drops.db-journal
