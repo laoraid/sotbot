@@ -29,6 +29,11 @@ class DB(object):
                  f"where {where} = '{wheredata}'")
         self.query(query)
 
+    def delete(self, table, where, wheredata):
+        query = f"delete from {table} where {where}='{wheredata}'"
+        self.cur.execute(query)
+        self.con.commit()
+
     def select(self, field, table):
         query = f"select {field} from {table}"
         return self.query(query)

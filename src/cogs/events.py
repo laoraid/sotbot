@@ -53,8 +53,15 @@ class Events(commands.Cog):
         dl = [db.Drops(reward, startdate, enddate)]
         self.db.insert(title, dl)
 
-    @tasks.loop(hours=2)
-    async def twitch_drops_loop(self):
+    @owner_command
+    async def deletedrops(self, ctx, title):
+        self.db.delete("drops", "title", title)
+
+    @owner_command
+    async def dropsupdate(self, ctx):
+        await self.get_twitch_drops(True)
+
+    async def get_twitch_drops(self, forceupdate=False):
         DROPSURL = "https://seaofthieves.gamepedia.com/Twitch_Drops?action=raw"
         async with aiohttp.ClientSession() as session:
             async with session.get(DROPSURL) as res:
@@ -67,7 +74,8 @@ class Events(commands.Cog):
                 fsec = parsed.sections[1]
                 title = fsec.title.strip()
                 last = self.db.last
-                if last is not None and title == self.db.last[2]:
+                if (last is not None and title == self.db.last[2]
+                        and not forceupdate):
                     self.db.updatedate(datetime.datetime.utcnow())
                     Log.v(v="드롭스 변경 없음")
                     return
@@ -103,6 +111,10 @@ class Events(commands.Cog):
 
         self.db.insert(title, dropslist)
         Log.v(v="드롭스 불러옴")
+
+    @tasks.loop(hours=2)
+    async def twitch_drops_loop(self, forceupdate=False):
+        await self.get_twitch_drops()
 
     @twitch_drops_loop.error
     async def twitch_drops_error(self, error):
