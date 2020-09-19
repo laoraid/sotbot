@@ -99,7 +99,10 @@ class Events(commands.Cog):
                         if fm is not None:
                             continue
                         elif lm is not None:
-                            reward = lm.group("name")
+                            reward = []
+                            for r in d.split("\n"):
+                                lm = linkre.match(r)
+                                reward.append(lm.group("name"))
                         else:
                             startdate = datetime.datetime.utcnow()
                             r = datetime.datetime.strptime(d, "%B %d")
@@ -107,7 +110,8 @@ class Events(commands.Cog):
                                 month=r.month, day=r.day, hour=9, minute=0)
                             enddate = startdate + datetime.timedelta(days=1)
 
-                    dropslist.append(db.Drops(reward, startdate, enddate))
+                    dropslist.append(
+                        db.Drops(", ".join(reward), startdate, enddate))
 
         self.db.insert(title, dropslist)
         Log.v(v="드롭스 불러옴")
