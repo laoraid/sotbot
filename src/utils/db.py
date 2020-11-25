@@ -1,8 +1,7 @@
-import sqlite3
 import datetime
-import pickle
+import sqlite3
 
-from . import mkEmptyList, toKCT
+from . import mkEmptyList
 
 
 class DB(object):
@@ -126,12 +125,22 @@ class TwitchDropsDB(DB):
 
     def insert(self, title, drops):
         dt = datetime.datetime.utcnow()
-        dropsdata = pickle.dumps(drops)
-        dropsdata = sqlite3.Binary(dropsdata)
+        title = title.replace("'", "\'")
 
-        self.cur.execute(("insert into drops(dropsdata, title, lastcheck)"
-                          " values (?,?,?)"),
-                         (dropsdata, title, dt))
+        self.cur.execute(("insert into drops(title, updateddate)"
+                          " values (?,?)"),
+                         (title, dt))
+        self.con.commit()
+        self.cur.execute(
+            "select drop_id from drops where title = (?)", (title,))
+        key = self.cur.fetchall()[-1][0]
+
+        for drop in drops:
+            self.cur.execute(("insert into dropsdata"
+                              " (drop_id, item, startdate, enddate)"
+                              " values (?, ?, ?, ?)"),
+                             (key, drop.reward, drop.startdate, drop.enddate))
+
         self.con.commit()
 
     def updatedate(self, dt):
@@ -139,17 +148,20 @@ class TwitchDropsDB(DB):
 
     @property
     def last(self):
-        q = ("select lastcheck, dropsdata, title from drops"
-             " order by lastcheck desc")
+        q = ("select title, updateddate, item, startdate, enddate from drops"
+             " inner join dropsdata on dropsdata.drop_id = drops.drop_id"
+             " where updateddate = (select max(updateddate) from drops)"
+             " order by startdate")
         data = self.query(q)
 
         if len(data) == 0:
             return None
 
-        data = data[0]
+        title = data[0][0]
+        dropsdata = []
+        for d in data:
+            startdt = datetime.datetime.strptime(d[3], "%Y-%m-%d %H:%M:%S.%f")
+            enddt = datetime.datetime.strptime(d[4], "%Y-%m-%d %H:%M:%S.%f")
+            dropsdata.append(Drops(d[2], startdt, enddt))
 
-        dt = datetime.datetime.strptime(data[0], "%Y-%m-%d %H:%M:%S.%f")
-        dt = toKCT(dt)
-
-        drops = pickle.loads(data[1])
-        return (dt, drops, data[2])
+        return (title, dropsdata)
