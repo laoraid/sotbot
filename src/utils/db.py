@@ -143,9 +143,6 @@ class TwitchDropsDB(DB):
 
         self.con.commit()
 
-    def updatedate(self, dt):
-        self.update("drops", "lastcheck", dt, "title", self.last[2])
-
     @property
     def last(self):
         q = ("select title, updateddate, item, startdate, enddate from drops"

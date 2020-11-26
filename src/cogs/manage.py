@@ -97,6 +97,18 @@ class Manage(commands.Cog):
             await ctx.send("\n".join(log))
 
     @owner_command
+    async def chpresence(self, ctx, pre, status):
+        statusmap = {'online': discord.Status.online,
+                     'offline': discord.Status.offline,
+                     'idle': discord.Status.idle, 'dnd': discord.Status.dnd}
+
+        if status not in statusmap:
+            await ctx.send(statusmap)
+            return
+        await ctx.bot.change_presence(activity=discord.Game(pre),
+                                      status=status)
+
+    @owner_command
     async def 길드(self, ctx):
         guilds = []
         for g in self.bot.guilds:
