@@ -52,10 +52,10 @@ class Server(commands.Cog):
     def __init__(self, bot: commands.Bot):
         # pylint: disable=no-member
         self.bot = bot
-        self.clearchannel.start()
+        #self.clearchannel.start()
         self.lock = asyncio.Lock()
 
-    @tasks.loop(seconds=60)
+    #@tasks.loop(seconds=60)
     async def clearchannel(self):
         for guild in self.bot.guilds:
             cats = _get_cats_by_guildID(guild.id, add=True)
@@ -74,19 +74,19 @@ class Server(commands.Cog):
                         await vc.delete()
                         Log.v(None, f"{chname} 채널 삭제됨")
 
-    @clearchannel.before_loop
+    #@clearchannel.before_loop
     async def before_clearchannel(self):
         await self.bot.wait_until_ready()
 
-    @clearchannel.error
+    #@clearchannel.error
     async def clearchannel_error(self, error):
         Log.e(error=error)
         trace = utils.get_traceback(error)
         print(trace)
         await self.bot.get_user(OWNER_ID).send(f"채널 청소 에러\n{trace}")
 
-    @normal_command("출항", "배 종류")
-    @commands.cooldown(1, 5, type=commands.BucketType.user)
+    #@normal_command("출항", "배 종류")
+    #@commands.cooldown(1, 5, type=commands.BucketType.user)
     async def 출항(self, ctx, ship: Ship):
         author = ctx.message.author
         if author.voice is not None:  # check already in ship channel

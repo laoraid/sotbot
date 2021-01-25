@@ -1,14 +1,14 @@
-import aiohttp
 import datetime
 import re
 
-from discord.ext import commands, tasks
+import aiohttp
 import wikitextparser
+from discord.ext import commands, tasks
 
 from .. import utils
-from ..utils import db, Log
-from ..utils import mk_embed, toKCT, Field, normal_command, owner_command
 from ..config import OWNER_ID
+from ..utils import (Field, Log, db, mk_embed, normal_command, owner_command,
+                     toKCT)
 
 
 class Events(commands.Cog):
