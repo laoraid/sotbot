@@ -26,7 +26,7 @@ def test_datetime():
     dt = datetime.datetime(2001, 1, 1, 1, 0, 0, 0, tzinfo=utils.KCT)
     dtstr = "2001-01-01 01:00:00"
 
-    assert dtstr == utils.dt_to_str(dt)
+    assert dtstr == utils.fmdate(dt)
 
 
 bot = commands.Bot("!")

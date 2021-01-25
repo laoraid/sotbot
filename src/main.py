@@ -1,11 +1,11 @@
 # region imports
-from discord.ext import commands
 import discord
+from discord.ext import commands
 
 from . import utils
+from .config import (ALLOWED_CHANNEL, BOT_TOKEN, CMD_PREFIX, EXTENSIONS,
+                     OWNER_ID)
 from .utils import Log, cb
-from .config import (CMD_PREFIX, EXTENSIONS, OWNER_ID,
-                     ALLOWED_CHANNEL, BOT_TOKEN)
 
 # endregion
 

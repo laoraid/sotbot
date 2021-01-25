@@ -59,6 +59,7 @@ class Manage(commands.Cog):
 
     @owner_command
     @commands.before_invoke(update_before("봇 재시작"))
+    @commands.after_invoke(update_after)
     async def update(self, ctx):
         log = []
         for ext in EXTENSIONS:
@@ -122,6 +123,10 @@ class Manage(commands.Cog):
         hiddencmd = [c.name for c in self.bot.commands if c.hidden]
         ", ".join(hiddencmd)
         await ctx.send(hiddencmd)
+
+    @owner_command
+    async def makehelpembed(self, ctx):
+        utils.make_help_embed(ctx.bot)
 
 
 def setup(bot):

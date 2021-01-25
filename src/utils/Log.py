@@ -2,7 +2,7 @@ import datetime
 import logging
 import logging.handlers
 
-from . import toKCT, dt_to_str
+from . import toKCT, fmdate
 
 logger = logging.getLogger("bot")
 logger.setLevel(logging.DEBUG)
@@ -15,13 +15,13 @@ logger.addHandler(logging.handlers.RotatingFileHandler(
 
 def i(ctx):
     time = toKCT(ctx.message.created_at)
-    ca = dt_to_str(time, True)
+    ca = fmdate(time, True)
     logger.info(f"[info/{ca}] {ctx.author} | {ctx.message.content}")
 
 
 def e(ctx=None, *, error):
     time = toKCT(datetime.datetime.utcnow())
-    now = dt_to_str(time, True)
+    now = fmdate(time, True)
     if ctx is None:
         content = error
     else:
@@ -37,6 +37,6 @@ def v(ctx=None, v=None):
         time = toKCT(ctx.message.created_at)
         content = ctx.message.content
 
-    ca = dt_to_str(time, True)
+    ca = fmdate(time, True)
 
     logger.debug(f"[Verbose/{ca}] {content} | {v}")

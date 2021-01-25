@@ -1,14 +1,17 @@
-import pytz
 import random
 import traceback
+from datetime import datetime
 
 import discord
+import pytz
 from discord.ext import commands
 
 from ..config import CMD_PREFIX, LONG_DESCRIPTIONS
 
 KCT = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
+BST = pytz.timezone("Europe/London")
+PST = pytz.timezone("America/Los_Angeles")
 
 
 def toKCT(date):
@@ -17,6 +20,14 @@ def toKCT(date):
     elif date.tzinfo == KCT:
         return date
     return date.astimezone(KCT)
+
+
+def utcto(timezone):
+    return UTCnow().astimezone(timezone)
+
+
+def UTCnow():
+    return UTC.localize(datetime.utcnow())
 
 
 def owner_command(func):
@@ -67,11 +78,24 @@ def mkhelpstr(cmd, *args, aliases=None):
     return " 또는 ".join(helpstr)
 
 
-def dt_to_str(date, include_timezone=False):
+def fmdate(date, include_timezone=False):
     tz = ""
     if include_timezone:
         tz = " %Z%z"
     return date.strftime(f"%Y-%m-%d %H:%M:%S{tz}")
+
+
+def hfmdate(date, include_timezone=False):
+    days = ["일", "월", "화", "수", "목", "금", "토"]
+    tz = ""
+    if include_timezone:
+        tz = " %Z%z"
+    day = date.strftime("%w")
+    format = f"%Y년 %m월 %d일 {days[int(day)]}요일 %H시 %M분 %S초{tz}"
+    format = format.encode("unicode-escape").decode()
+
+    dstr = date.strftime(format).encode().decode("unicode-escape")
+    return dstr
 
 
 def randcolor():

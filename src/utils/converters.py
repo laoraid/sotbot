@@ -1,6 +1,6 @@
 import re
-import tossi
 
+import tossi
 from discord.ext import commands
 
 from ..utils import str_help_by_cmd

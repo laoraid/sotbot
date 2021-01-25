@@ -1,17 +1,14 @@
-import re
-import difflib
 import datetime
-import aiohttp
-import math
 
-from discord.ext import commands
-from bs4 import BeautifulSoup
+import aiohttp
 import tossi
+from bs4 import BeautifulSoup
+from discord.ext import commands
 
 from .. import utils
-from ..utils import dt_to_str, cb, Field, normal_command, str_help_by_cmd
-from ..utils import db, converters, Log
-from ..utils.converters import convert_animal
+from ..classes.datafinder import IslandFinder
+from ..utils import (BST, KCT, PST, Field, Log, UTCnow, cb, converters, fmdate,
+                     hfmdate, mk_embed, normal_command, str_help_by_cmd, utcto)
 
 RELOAD_TIME = datetime.timedelta(minutes=3)
 
@@ -41,57 +38,37 @@ class Game(commands.Cog):
         self.lastchktime = None
         self.lastserverstat = ""
 
-        self.db = db.IslandDB()
-        self.db.connect()
+        self.islandfinder = IslandFinder()
 
     def cog_unload(self):
-        self.db.close()
+        self.islandfinder.close()
 
     @normal_command("좌표", "섬 이름", aliases=["pos"])
     async def 좌표(self, ctx, *, island):
         origin = island
         island = island.lower()
 
-        iseng = re.match(r'[^ㄱ-ㅎㅏ-ㅣ가-힣]', island)
-        iseng = True if iseng is not None else False
+        t = self.islandfinder.findisland(island)
 
-        if iseng:
-            islands = self.db.field("Engname")
+        if t is None:
+            await ctx.send(f"{cb(island)} 섬을 찾을 수 없습니다.")
+            Log.v(ctx, f"{island} 검색 실패")
+            return None
+
+        if(t["useddiff"]):
+            Log.v(ctx, f"{origin} --> {t['islandname']} 유사 문자열")
         else:
-            islands = self.db.field("KRname")
+            Log.v(ctx, f"{origin} --> {t['islandname']} 부분 문자열")
 
-        substr = [x for x in islands if re.search(rf"\b{island}\b", x.lower())]
-        if len(substr) == 0:
-            substr = [x for x in islands if island in x.lower()]
+        await ctx.send(embed=self.make_pos_embed(t))
 
-        if len(substr) == 0:
-            clmat = difflib.get_close_matches(island, islands, cutoff=0.3)
-            if len(clmat) == 0:
-                await ctx.send(f"{cb(island)} 섬을 찾을 수 없습니다.")
-                Log.v(ctx, f"{island} 검색 실패")
-                return None
-            else:
-                island = clmat[0]
-                ratio = difflib.SequenceMatcher(None, origin, island).ratio()
-                Log.v(ctx, f"{origin} -> {island} (유사도 : {ratio:.2f})")
-        else:
-            island = substr[0]
-            Log.v(ctx, f"{origin} -> {island} (부분 문자열)")
-        await ctx.send(embed=self.make_pos_embed(island, iseng))
-
-    def make_pos_embed(self, name, iseng):
-        if iseng:
-            data = self.db.get_data_by_name("eng", name)
-        else:
-            data = self.db.get_data_by_name("kr", name)
-        urlname = data["engname"].replace(" ", "_")
-        WIKI_URL = f"https://seaofthieves.gamepedia.com/{urlname}"
-        embed = utils.mk_embed(name,
-                               Field("좌표", data["pos"]),
-                               Field("동물", value=convert_animal(data)),
-                               Field("해역", data["region"], False),
-                               titleurl=WIKI_URL, color=clr_region(
-                                   data["region"]),
+    def make_pos_embed(self, t):
+        embed = utils.mk_embed(t["islandname"],
+                               Field("좌표", t["pos"]),
+                               Field("동물", t["animal"]),
+                               Field("해역", t["region"], False),
+                               titleurl=t["wikiurl"],
+                               color=clr_region(t["region"]),
                                footer="섬 이름 클릭시 위키로 이동됨")
         return embed
 
@@ -138,42 +115,13 @@ class Game(commands.Cog):
                 self.lastserverstat = SERVER_UNKNOWN
         else:
             Log.v(ctx, f"이전 상태 불러옴 {cachetime}")
-        lctstr = dt_to_str(self.lastchktime)
+        lctstr = fmdate(self.lastchktime)
 
         if msg is not None:
             await msg.delete()
 
-        await ctx.send(f"{self.lastserverstat} 확인 시간 : {cb(lctstr)}")
-
-    def _close_island(self, pos, animals):
-        def get_int(pos):
-            x = ord(pos[0])
-            y = int(pos[1:])
-            return (x, y)
-
-        def get_distance(x1, y1, x2, y2):
-            dx = (x1 - x2) ** 2
-            dy = (y1 - y2) ** 2
-
-            return math.sqrt(dx + dy)
-
-        stx, sty = get_int(pos)
-        islands = self.db.get_data_by_animal(animals)
-
-        if len(islands) == 0:
-            return None
-
-        distemp = 9999
-        islandtemp = ""
-
-        for island in islands:
-            isx, isy = get_int(island["pos"].replace("-", ""))
-            dis = get_distance(stx, sty, isx, isy)
-            if distemp > dis:
-                distemp = dis
-                islandtemp = island["krname"]
-
-        return islandtemp
+        await ctx.send((f"{self.lastserverstat} 확인 시간 : {cb(lctstr)} "
+                        "실제 서버 상태와 다를 수 있어요."))
 
     @normal_command("동물", "현재 좌표", "동물1", "동물2...")
     async def 동물(self, ctx, p: converters.Position,
@@ -183,7 +131,7 @@ class Game(commands.Cog):
                 f"동물 이름을 알 수 없습니다. {str_help_by_cmd('동물')}")
 
         n = set(n)
-        closeisland = self._close_island(p, n)
+        closeisland = self.islandfinder.close_island(p, n)
 
         if closeisland is None:
             await ctx.send(f"조건에 맞는 섬을 찾을 수 없습니다. {str_help_by_cmd('동물')}")
@@ -195,7 +143,17 @@ class Game(commands.Cog):
         animalstrs = tossi.postfix(animalstrs, "이")
 
         await ctx.send(f"{cb(p)}에서 {animalstrs} 있는 가장 가까운 섬은...",
-                       embed=self.make_pos_embed(closeisland, False))
+                       embed=self.make_pos_embed(closeisland))
+
+    @normal_command("시간", aliases=["time", "시각"])
+    async def 시간(self, ctx):
+        embed = mk_embed("현재 시각은...",
+                         Field("KCT", hfmdate(utcto(KCT)), False),
+                         Field("UTC/GMT", hfmdate(UTCnow()), False),
+                         Field("BST", hfmdate(utcto(BST)), False),
+                         Field("PST", hfmdate(utcto(PST)), False),
+                         color=5234869)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
