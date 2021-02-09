@@ -112,7 +112,8 @@ def str_help_by_cmd(cmdname):
 
 
 def make_help_embed(bot):
-    global viscomsdict, viscoms
+    global viscomsdict, viscoms, helpembed
+    helpembed = discord.Embed(title="명령어 리스트", color=0x2ba3ee)
     viscomsdict = {k: v for k,
                    v in bot.all_commands.items() if not v.hidden}
     viscoms = [x for x in bot.commands if not x.hidden]

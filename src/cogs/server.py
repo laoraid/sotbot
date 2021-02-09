@@ -4,10 +4,11 @@ import re
 import discord
 import tossi
 from discord.ext import commands
+from src.classes.datafinder import AfkMemory
 
 from .. import utils
-from ..config import ADD_CATEGORIES, CATEGORIES, OWNER_ID
-from ..utils import Log, cb, mkhelpstr, normal_command
+from ..config import ADD_CATEGORIES, CATEGORIES, CMD_PREFIX, OWNER_ID
+from ..utils import Log, cb, mkhelpstr, normal_command, owner_command
 from ..utils.converters import Ship
 
 
@@ -54,6 +55,10 @@ class Server(commands.Cog):
         self.bot = bot
         # self.clearchannel.start()
         self.lock = asyncio.Lock()
+        self._afkmem = AfkMemory()
+
+    def cog_unload(self):
+        self._afkmem.close()
 
     # @tasks.loop(seconds=60)
     async def clearchannel(self):
@@ -166,6 +171,63 @@ class Server(commands.Cog):
         for member in members:
             if admin not in member.roles and not member.bot:
                 await member.add_roles(role)
+
+    # @normal_command("잠수")
+    async def 잠수(self, ctx: commands.Context):
+        author = ctx.message.author
+        id = author.id
+        if id in self._afkmem:
+            prevnick = self._afkmem[id]
+            self._afkmem.pop(id)
+            await author.edit(nick=prevnick, reason="잠수 명령어 해제")
+            await ctx.send(f"{author.mention}, 잠수 상태가 해제되었습니다.")
+        else:
+            prevnick = author.nick
+            await author.edit(nick="잠깐잠수중", reason="잠수 명령어 사용")
+            await ctx.send(f"{author.mention}, 닉네임이 `잠깐잠수중` 으로 변경되었습니다.\n"
+                           f"잠수 상태를 해제하려면 다시 {CMD_PREFIX}잠수 명령어를 사용하세요.")
+            self._afkmem[id] = prevnick
+
+    # @normal_command("모집", aliases=["recruit"])
+    @owner_command
+    async def 모집(self, ctx, *, what):
+        author = ctx.message.author
+        if author.voice is None:
+            await ctx.send(f"{author.mention}, 보이스 채널에 들어간 뒤 실행해 주세요.")
+            ctx.command.reset_cooldown(ctx)
+            return None
+
+        chname = author.voice.channel.name
+
+        title = f"{chname} {what}"
+        msg = await ctx.send(f"{author.mention}, 다음과 같이 글이 써집니다. "
+                             f"제목 및 내용 : {title}\n"
+                             "확인하셨으면 :thumbsup:, 취소하려면 :thumbsdown: 클릭")
+        await msg.add_reaction("👍")
+        await msg.add_reaction("👎")
+
+        def check(reaction, user):
+            if reaction.emoji in ("👍", "👎") and user == author:
+                return True
+            else:
+                return False
+
+        async def cancel():
+            await ctx.send(f"{author.mention}, 취소되었습니다.")
+            ctx.command.reset_cooldown(ctx)
+
+        try:
+            reaction, _ = await self.bot.wait_for("reaction_add",
+                                                  timeout=60.0, check=check)
+        except asyncio.TimeoutError:
+            await cancel()
+            return None
+        else:
+            if reaction.emoji == "👎":
+                await cancel()
+                return None
+
+            await msg.delete()
 
 
 def setup(bot):
