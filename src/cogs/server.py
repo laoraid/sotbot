@@ -13,24 +13,28 @@ class Server(commands.Cog):
         # pylint: disable=no-member
         self.bot = bot
         self.clearchannel.start()
+        self.emptychset = set()
 
     @tasks.loop(seconds=20)
     async def clearchannel(self):
+        while self.emptychset:
+            c = self.emptychset.pop()
+            if c in c.guild.voice_channels and len(c.members) == 0:
+                txtchs = [x for x in c.guild.text_channels]
+                t = [x for x in txtchs if x.name == c.name.replace("#", "")]
+                if len(t) > 0:
+                    Log.v(None, f"{t[0].name} 텍스트채널 삭제")
+                    await t[0].delete()
+                Log.v(None, f"{c.name} 보이스채널 삭제")
+                await c.delete()
+
         for guild in self.bot.guilds:
             voicechs = [
                 x
                 for x in guild.voice_channels
                 if len(x.members) == 0 and re.match(r".+#\d$", x.name) is not None
             ]
-            txtchs = [x for x in guild.text_channels]
-
-            for v in voicechs:
-                t = [x for x in txtchs if x.name == v.name.replace("#", "")]
-                if len(t) > 0:
-                    Log.v(None, f"{t[0].name} 텍스트채널 삭제")
-                    await t[0].delete()
-                Log.v(None, f"{v.name} 보이스채널 삭제")
-                await v.delete()
+            self.emptychset.update(voicechs)
 
     @clearchannel.before_loop
     async def before_clearchannel(self):
