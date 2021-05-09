@@ -55,13 +55,6 @@ async def test_animal():
     chk_pos_embed(embed, island, pos, animal, region)
 
 
-@pytest.mark.asyncio
-async def test_server():
-    callback = getattr(g.서버, "callback")
-
-    await callback(g, ctx)
-
-
 def test_help():
     embed = utils.make_cmd_help_embed(g.동물)
     ld = config.LONG_DESCRIPTIONS["동물"]

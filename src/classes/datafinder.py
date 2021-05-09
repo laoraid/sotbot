@@ -98,27 +98,3 @@ class singleton(type):
             cls._instance[cls] = super(
                 singleton, cls).__call__(*args, **kwargs)
         return cls._instance[cls]
-
-
-class AfkMemory(dict, metaclass=singleton):
-    PATH = "./src/afk.txt"
-
-    def __init__(self):
-        self._load()
-
-    def close(self):
-        self._save()
-
-    def _load(self):
-        self.clear()
-        file = open(self.PATH, "r", encoding="utf-8")
-        for line in file.readlines():
-            id, prevnick = line.split("|")
-            id = int(id)
-            self[id] = prevnick
-        file.close()
-
-    def _save(self):
-        file = open(self.PATH, "w", encoding="utf-8")
-        for userid, prevnick in self.items():
-            file.write(f"{userid}|{prevnick}")

@@ -87,3 +87,32 @@ class Ship(commands.Converter):
 
         arg = tossi.postfix(arg, "는")
         raise commands.BadArgument(f"{arg} 배 종류가 아닙니다.")
+
+
+class Fish(commands.Converter):
+    async def convert(self, ctx, arg):
+        arg = arg.lower()
+
+        if arg in ["스플래쉬테일", "스플레시테일", "스플레쉬테일", "스플래시테일", "splashtail"]:
+            return "스플래쉬테일"
+        elif arg in ["플렌티핀", "플랜티핀", "plentifins"]:
+            return "플렌티핀"
+        elif arg in ["앤션트스케일", "엔션트스케일", "앤션트스캐일", "엔션트스캐일", "ancientscales"]:
+            return "앤션트스케일"
+        elif arg in ["와일드스플래쉬", "와일드스플래시", "와일드스플레쉬", "wildsplashes"]:
+            return "와일드스플래쉬"
+        elif arg in ["데빌피쉬", "데빌피시", "devilfish"]:
+            return "데빌피쉬"
+        elif arg in ["아일호퍼", "islehoppers"]:
+            return "아일호퍼"
+        elif arg in ["폰디", "pondies"]:
+            return "폰디"
+        elif arg in ["배틀길", "battlegills"]:
+            return "배틀길"
+        elif arg in ["스톰피쉬", "스톰피시", "stormfish"]:
+            return "스톰피쉬"
+        elif arg in ["래커", "레커", "wreckers"]:
+            return "래커"
+
+        arg = tossi.postfix(arg, "는")
+        raise commands.BadArgument(f"{arg} 물고기 종류가 아닙니다.")

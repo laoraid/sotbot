@@ -5,7 +5,6 @@ from discord.ext import commands
 
 from src import utils
 from src.config import CMD_PREFIX
-from src.cogs import server
 
 
 def test_mkhelpstr():
@@ -98,29 +97,6 @@ async def test_converter_pos():
     assert "A03" == await p.convert(None, "a-03")
     assert "P19" == await p.convert(None, "P19")
     assert "Z21" == await p.convert(None, "z21")
-
-
-def test_regex_voicech():
-    c1 = "추가 슬루프 - 213"
-    c2 = "브리건틴 - 2"
-    c3 = "추가 갤리온 - 1"
-    c4 = "추 갤리온 14"
-    c5 = "추가 g -1"
-
-    rc1 = server._regex_voicech(c1)
-    assert rc1 is not None
-    assert rc1.group("name") == "슬루프"
-    assert rc1.group("num") == "213"
-    rc2 = server._regex_voicech(c2)
-    assert rc2 is not None
-    assert rc2.group("name") == "브리건틴"
-    assert rc2.group("num") == "2"
-    rc3 = server._regex_voicech(c3)
-    assert rc3 is not None
-    assert rc3.group("name") == "갤리온"
-    assert rc3.group("num") == "1"
-    assert server._regex_voicech(c4) is None
-    assert server._regex_voicech(c5) is None
 
 
 @pytest.mark.asyncio
