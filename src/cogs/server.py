@@ -5,7 +5,7 @@ from src.config import OWNER_ID
 import discord
 from discord.ext import commands, tasks
 
-from ..utils import mkhelpstr, normal_command, Log
+from ..utils import mkhelpstr, normal_command, Log, owner_command
 from .. import utils
 
 
@@ -53,6 +53,11 @@ class Server(commands.Cog):
                 if len(x.members) == 0 and (re.match(r".+#\d+$", x.name) is not None)
             ]
             self.emptychset.update(voicechs)
+
+    @owner_command
+    async def stop_clear(self, ctx):
+        self.clearchannel.stop()
+
 
     @clearchannel.before_loop
     async def before_clearchannel(self):
