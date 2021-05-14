@@ -38,6 +38,8 @@ class Server(commands.Cog):
                     await c.delete()
                 except discord.errors.Forbidden:
                     pass
+                except discord.errors.NotFound:
+                    pass
 
         for guild in self.bot.guilds:
             voicechs = [
