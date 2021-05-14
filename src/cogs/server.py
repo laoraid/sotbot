@@ -1,4 +1,5 @@
 import re
+
 from src.config import OWNER_ID
 
 import discord
@@ -6,6 +7,13 @@ from discord.ext import commands, tasks
 
 from ..utils import mkhelpstr, normal_command, Log
 from .. import utils
+
+
+def find_missing(arr):
+    for i in range(len(arr) - 1):
+        if arr[i] + 1 != arr[i + 1]:
+            return arr[i] + 1
+    return arr[-1] + 1
 
 
 class Server(commands.Cog):
@@ -26,13 +34,16 @@ class Server(commands.Cog):
                     Log.v(None, f"{t[0].name} 텍스트채널 삭제")
                     await t[0].delete()
                 Log.v(None, f"{c.name} 보이스채널 삭제")
-                await c.delete()
+                try:
+                    await c.delete()
+                except discord.errors.Forbidden:
+                    pass
 
         for guild in self.bot.guilds:
             voicechs = [
                 x
                 for x in guild.voice_channels
-                if len(x.members) == 0 and re.match(r".+#\d$", x.name) is not None
+                if len(x.members) == 0 and (re.match(r".+#\d+$", x.name) is not None)
             ]
             self.emptychset.update(voicechs)
 
@@ -78,6 +89,31 @@ class Server(commands.Cog):
         for member in members:
             if admin not in member.roles and not member.bot:
                 await member.add_roles(role)
+
+    @normal_command("출항")
+    @commands.cooldown(100, 10, commands.BucketType.user)
+    async def 출항(self, ctx: commands.Context):
+        vc = ctx.author.voice
+        if vc is not None and "띄우기" in vc.channel.name:
+            name = vc.channel.name.replace("띄우기", "").strip()
+            category = vc.channel.category
+            findnum = [
+                int(x.name.split("#")[1])
+                for x in category.voice_channels
+                if "#" in x.name and name in x.name
+            ]
+
+            findnum.append(0)
+            findnum.sort()
+
+            name += f"#{find_missing(findnum)}"
+            ch = await category.create_voice_channel(name)
+            Log.v(ctx, f"보이스 채널 생성 {name}")
+
+            await ctx.author.move_to(ch)
+        else:
+            await ctx.send(f"{ctx.author.mention}, 띄우기 채널에 있을때만 동작합니다.")
+            ctx.command.reset_cooldown(ctx)
 
 
 def setup(bot):

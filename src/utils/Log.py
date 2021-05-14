@@ -9,8 +9,11 @@ logger.setLevel(logging.DEBUG)
 
 logger.addHandler(logging.StreamHandler())
 maxbyte = 1024 * 1024 * 10
-logger.addHandler(logging.handlers.RotatingFileHandler(
-    "bot.log", maxBytes=maxbyte, backupCount=10))
+logger.addHandler(
+    logging.handlers.RotatingFileHandler(
+        "bot.log", maxBytes=maxbyte, backupCount=10, encoding="utf-8"
+    )
+)
 
 
 def i(ctx):
