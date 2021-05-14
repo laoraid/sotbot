@@ -32,7 +32,12 @@ class Server(commands.Cog):
                 t = [x for x in txtchs if x.name == c.name.replace("#", "")]
                 if len(t) > 0:
                     Log.v(None, f"{t[0].name} 텍스트채널 삭제")
-                    await t[0].delete()
+                    try:
+                        await t[0].delete()
+                    except discord.errors.Forbidden:
+                        pass
+                    except discord.errors.NotFound:
+                        pass
                 Log.v(None, f"{c.name} 보이스채널 삭제")
                 try:
                     await c.delete()
