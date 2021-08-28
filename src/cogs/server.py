@@ -23,8 +23,9 @@ class Server(commands.Cog):
         self.clearchannel.start()
         self.emptychset = set()
 
-    @tasks.loop(seconds=20)
+    @tasks.loop(seconds=10)
     async def clearchannel(self):
+        print("tick")
         while self.emptychset:
             c = self.emptychset.pop()
             if c in c.guild.voice_channels and len(c.members) == 0:
@@ -53,11 +54,12 @@ class Server(commands.Cog):
                 if len(x.members) == 0 and (re.match(r".+#\d+$", x.name) is not None)
             ]
             self.emptychset.update(voicechs)
+            if len(voicechs) != 0:
+                print("asdasdasdasdasdsad")
 
     @owner_command
     async def stop_clear(self, ctx):
         self.clearchannel.stop()
-
 
     @clearchannel.before_loop
     async def before_clearchannel(self):
