@@ -1,0 +1,4 @@
+xbox 아이디만 입력하세요.
+
+EX) {CMD_PREFIX}아이디 seaboong123
+씨붕이 -> 씨붕이(seaboong123)
