@@ -1,5 +1,9 @@
 import random
+from asyncio import TimeoutError
 from functools import lru_cache
+from typing import Iterable
+
+from interactions import ActionRow, BaseContext, Client, ComponentType
 
 from src.classes import myembed
 from src.classes.data import Island
@@ -35,7 +39,7 @@ def make_pos_embed(island: Island, lang: str = "kor") -> "myembed.MyEmbed":
     )
 
 
-def region_color(region) -> int:
+def region_color(region: str) -> int:
     RED = 0xD22B55  # noqa
     GREEN = 0x05F445  # noqa
     GRAY = 0x7C828E  # noqa
@@ -51,3 +55,32 @@ def region_color(region) -> int:
         return PURPLE
 
     return randcolor()
+
+
+async def send_component_wait(
+    ctx: BaseContext,
+    bot: Client,
+    components: Iterable[ActionRow] | ComponentType,
+    leftcomponent: ComponentType | None = None,
+) -> ComponentType:
+    msg = await ctx.send(components=components)
+    try:
+        usedcomp = await bot.wait_for_component(components=components)
+    except TimeoutError:
+        raise
+    finally:
+        if isinstance(components, Iterable):
+            for actionrow in components:
+                for component in actionrow:
+                    component.disabled = True
+        else:
+            components.disabled = True
+
+        if leftcomponent is not None:
+            left = leftcomponent
+        else:
+            left = []
+
+        await msg.edit(components=left)
+
+        return usedcomp

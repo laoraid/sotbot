@@ -1,4 +1,6 @@
-from interactions import Extension, InteractionContext
+from interactions import Extension, InteractionContext, SlashCommand
+
+from src.classes.prefixed_command import NormalCommand
 
 from ..classes.mylogger import botlogger
 from ..vars import ALLOWED_CHANNEL, ID_CHANGE_CHANNEL
@@ -11,13 +13,14 @@ class Extensionbase(Extension):
         self.add_extension_prerun(self.pre_run)
 
     async def channel_check(self, ctx: InteractionContext):
-        chk = False
-        if ctx.command.name == "아이디":
+        cmd = ctx.command
+        if (isinstance(cmd, NormalCommand) and cmd.name == "아이디") or (
+            isinstance(cmd, SlashCommand) and cmd.resolved_name == "아이디"
+        ):
             chk = ctx.channel_id == ID_CHANGE_CHANNEL
         else:
             chk = ctx.channel.id in ALLOWED_CHANNEL
 
-        botlogger.info(f"체크 : {chk}")
         return chk
 
     async def pre_run(self, ctx: InteractionContext, *args, **kwargs):

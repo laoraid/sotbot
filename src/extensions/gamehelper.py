@@ -1,3 +1,5 @@
+from asyncio import TimeoutError
+
 from interactions import ActionRow, Button, ButtonStyle, Client, SlashContext, StringSelectMenu
 
 from src.classes.data import Animal, Island, Islandxl, Position, SearchType

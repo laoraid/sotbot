@@ -28,7 +28,7 @@ class Game(Extensionbase):
     @slash_command(name="좌표", description="🏝️ 섬을 검색합니다.")
     @slash_option(name="이름", description="섬 이름", required=True, opt_type=OptionType.STRING, autocomplete=True)
     async def island_slash(self, ctx, 이름: str):
-        await islandhelper(ctx, 이름)
+        await islandhelper(ctx, 이름, self.db, self.bot)
 
     @slash_command(name="동물", description="🐖 현재 위치에서 동물이 있는 섬을 찾습니다.")
     @slash_option(name="좌표", description="현재 좌표입니다. 예) C-1, A6", required=True, opt_type=OptionType.STRING)

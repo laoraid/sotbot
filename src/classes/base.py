@@ -11,7 +11,7 @@ from src.classes.myembed import Field, MyEmbed
 from src.classes.mylogger import botlogger
 from src.classes.prefixed_command import normal_command_list
 from src.classes.utils import make_cmd_embed
-from src.vars import COMMAND_PREFIX
+from src.vars import COMMAND_PREFIX, OWNER_ID
 
 # load_exteonsions method from interactions.py example.
 # https://github.com/NAFTeam/Bot-Template/blob/main/%7B%7B%20cookiecutter.project_slug%20%7D%7D/core/extensions_loader.py
@@ -47,7 +47,7 @@ class Sotbot(Client):
     @listen(disable_default_listeners=True)
     async def on_command_error(self, event: CommandError):
         error = event.error
-        botlogger.info(f"오류 처리 : {str(error)}")
+        botlogger.info(f"오류 처리 : {type(error)}")
         if isinstance(error, errors.CommandCheckFailure):
             await event.ctx.send("이 채널에서 사용할 수 없습니다.")
         elif isinstance(error, errors.BadArgument):
@@ -60,8 +60,15 @@ class Sotbot(Client):
                 await event.ctx.send(embed=make_cmd_embed(cmdname))
         elif isinstance(error, (NotPositionStringError, NotAnimalStringError)):
             await event.ctx.send(str(error)[:-1])
+        elif isinstance(error, errors.Forbidden):
+            await event.ctx.send("권한 부족")
+            traceback = get_traceback(error)
+            botlogger.warning(traceback)
         else:
-            botlogger.error(get_traceback(event.error))
+            traceback = get_traceback(error)
+            botlogger.error(traceback)
+            owner = await self.fetch_user(OWNER_ID)
+            await owner.send(f"에러 발생 : {type(error)}\n{traceback}")
 
     @lru_cache
     def make_help_embed(self):
