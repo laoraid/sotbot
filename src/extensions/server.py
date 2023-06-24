@@ -13,7 +13,7 @@ class Server(Extensionbase):
         await ctx.send(embed=make_cmd_embed(args[0]))
 
     @normal_command("아이디", "xboxid", description_file_name="xboxid", has_long_description=True)
-    async def id_prefixed(self, ctx: PrefixedContext, id: str):
+    async def id_prefixed(self, ctx: PrefixedContext, *, id: str):
         await xboxid(ctx, id)
 
     @slash_command(name="아이디", description="🆔 xbox 아이디가 보이게 닉네임을 변경합니다.")
