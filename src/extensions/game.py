@@ -76,7 +76,7 @@ class Game(Extensionbase):
     @island_slash.autocomplete("이름")
     async def island_autocomplete(self, ctx: AutocompleteContext):
         startswith = ctx.input_text
-        auto_list = [{"name": x, "value": x} for x in self.db.names("kor") if x.startswith(startswith)]
+        auto_list = [x for x in self.island_auto_list if x["name"].startswith(startswith)]
 
         if len(auto_list) > 25:
             auto_list = auto_list[:25]
